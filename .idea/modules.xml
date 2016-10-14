@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Backend/CrowdingModule/CrowdingModule.iml" filepath="$PROJECT_DIR$/Backend/CrowdingModule/CrowdingModule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Backend/DITAWS/DITAWS.iml" filepath="$PROJECT_DIR$/Backend/DITAWS/DITAWS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FrontEnd/FrontEnd.iml" filepath="$PROJECT_DIR$/FrontEnd/FrontEnd.iml" />
+    </modules>
+  </component>
+</project>

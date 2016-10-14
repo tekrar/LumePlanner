@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="CrowdingModule:war">
+    <output-path>$PROJECT_DIR$/Backend/CrowdingModule/target</output-path>
+    <root id="archive" name="CrowdingModule.war">
+      <element id="artifact" artifact-name="CrowdingModule:war exploded" />
+    </root>
+  </artifact>
+</component>

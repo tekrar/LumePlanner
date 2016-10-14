@@ -1,0 +1,36 @@
+<header class="bs-header text-center" id="overview" style="height:auto">
+    <div class="container" style="text-align:center;">
+      <h3 id="app-heading">{{view_name == null ? '' : view_name}}</h3>
+    </div>
+</header>
+<div class="container-fluid" style="height:96%;">
+  <div class="container-fluid row" style="height:50%;padding-top:5%;">
+    <div class="container-fluid row" style="height:auto;">
+      <div class="col-md-12">
+        <h2 class="hidden-xs hidden-sm">How do you like your Visiting Plan?</h2>
+        <h5 class="hidden-md hidden-lg">How do you like your Visiting Plan?</h5>
+        <div class="btn-group col-md-12" role="group" id="sequence"  style="width:100%">
+          <button type="button" ng-class="{'active': like0}" class="btn btn-default" ng-click="seq(0)" style="width:50%">I Liked it</button>
+          <button type="button" ng-class="{'active': like1}" class="btn btn-default" ng-click="seq(1)" style="width:50%">I Disliked it</button>
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid row" style="height:auto;padding-top:1%;">
+      <div class="col-md-12">
+        <h2 class="hidden-xs hidden-sm">Has the crowding level met your expectations?</h2>
+        <h5 class="hidden-md hidden-lg">Has the crowding level met your expectations?</h5>
+        <div class="btn-group col-md-12" role="group" id="crowding" style="width:100%">
+          <button type="button" ng-class="{'active': crowd0}" class="btn btn-default" ng-click="crowd(0)" style="width:50%">As expected</button>
+          <button type="button" ng-class="{'active': crowd1}" class="btn btn-default" ng-click="crowd(1)" style="width:50%">Not satisfied</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid row" style="height:30%;padding-top:5%;">
+    <div class="col-md-12" style="width:100%">
+      <button type="button" class="btn btn-info" ng-click="restart()" style="width:100%">Plan your Visits for Tomorrow!</button>
+    </div>
+  </div>
+
+    <div id="logo" class="col-xs-offset-4 col-xs-4" style="height:5%;padding-top:5%;"></div>
+</div>
