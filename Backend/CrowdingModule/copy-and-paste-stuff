@@ -1,0 +1,8 @@
+db.createUser({user:"dita",pwd:"mames1976",roles:[{role:"dbAdmin",db:"lume-modena"}]})
+
+db.grid.createIndex({geometry:"2dsphere"});
+db.grid.ensureIndex({geometry:"2dsphere"});
+
+db.activities.createIndex({geometry:"2dsphere"});
+db.activities.ensureIndex({geometry:"2dsphere"});
+
