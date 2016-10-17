@@ -69,7 +69,11 @@ public class Mongo {
 
 	private java.util.logging.Logger mongoLogger;
 
-	public Mongo () {
+	private String nameDB;
+
+	public Mongo (String nameDB, String userDB, String pwdDB) {
+
+		this.nameDB = nameDB;
 
 		CodecRegistry codecRegistry = 
 				CodecRegistries.fromRegistries(
@@ -90,11 +94,11 @@ public class Mongo {
 			mongoClient = new MongoClient(new ServerAddress(p.getProperty("mongo.url")),
 					Arrays.asList(
 							MongoCredential.createCredential(
-									p.getProperty("mongo.user"),
-									p.getProperty("mongo.db"),
-									p.getProperty("mongo.password").toCharArray())),
+									userDB,
+									nameDB,
+									pwdDB.toCharArray())),
 									MongoClientOptions.builder().codecRegistry(codecRegistry).build());
-			db = mongoClient.getDatabase(p.getProperty("mongo.db"));
+			db = mongoClient.getDatabase(nameDB);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -212,6 +216,9 @@ public class Mongo {
 	}
 
 	public List<POI> retrieveActivities() {
+
+		logger.info("retrieveActivities from "+nameDB+" "+db.getName());
+
 		List<POI> result = new ArrayList<POI>();
 		try {
 			for (Iterator<Document> iter = db.getCollection("activities").find().iterator(); iter.hasNext();) {

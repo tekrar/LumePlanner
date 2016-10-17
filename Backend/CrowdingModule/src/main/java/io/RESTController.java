@@ -25,13 +25,15 @@ import services.ComputeP2PCrowdings;
 import services.LoadFiles;
 import services.UpdateCrowdings;
 
+import static util.HaversineDistance.haverDist;
+
 
 //import redis.clients.jedis.Jedis;
 
 @Controller
 @RequestMapping("/")
 public class RESTController {
-	private Properties p;
+	//private Properties p;
 	private Mongo dao;
 
 	private static List<POI> activities;	
@@ -48,33 +50,33 @@ public class RESTController {
 
 	private static Map<String, Map<String, Map<Integer, Map<String, Double>>>> p2p_cell_paths;
 
+	/*
 	public RESTController() {
-		p = new Properties();
+		Properties p = new Properties();
 
 		try {
 			p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
-			dao = new Mongo();
+			dao = new Mongo(p.getProperty("mongo.user"), p.getProperty("mongo.db"), p.getProperty("mongo.password"));
 		} catch(Exception e) {
 			//e.printStackTrace();
 			logger.info("Initialization for simulation experiment started");
 		}
 	}
-	/**
-	 * 
-	 */
+	*/
+
 	@RequestMapping(value = "init", headers="Accept=application/json", method = RequestMethod.GET)
 	public @ResponseBody boolean init() {
 		boolean result = false;
 
 		if (!initialized) {
-			p = new Properties();
+			Properties p = new Properties();
 			try {
-				
-				dao = new Mongo();
 				p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
+				dao = new Mongo(p.getProperty("mongo.db"), p.getProperty("mongo.user"), p.getProperty("mongo.password"));
+
 				logger.info("Crowding Module initialization started");
 
-				grid_crowdings = new LoadFiles().load(dao);
+				grid_crowdings = new LoadFiles().load(dao, this.getClass().getResource("/../data/"+p.getProperty("data.dir")).getPath());
 				logger.info("Grid Crowdings imported ("+grid_crowdings.size()+")");
 
 				activities = dao.retrieveActivities();
@@ -122,8 +124,14 @@ public class RESTController {
 		return result;
 	}
 
-
+	/*
 	private void writeCrowdings() {
+		Properties p = new Properties();
+		try {
+			p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		List<Cell> grid = dao.retrieveGrid();
 		Map<String, LngLatAlt> centroids = computeCentroids(grid);
 		Map<String, List<UncertainValue>> crowdings = dao.retrieveGridCrowdings();
@@ -181,8 +189,9 @@ public class RESTController {
 		}
 
 	}
+	*/
 
-
+	/*
 	private Map<String, LngLatAlt> computeCentroids(List<Cell> grid) {
 
 		Map<String, LngLatAlt> centroids = new HashMap<>();
@@ -204,7 +213,7 @@ public class RESTController {
 
 		return centroids;
 	}
-
+	*/
 
 	@Scheduled(fixedRate = 3600000) //hourly
 	public void update() throws IOException {
@@ -285,28 +294,4 @@ public class RESTController {
 		logger.info("Updated "+updated);
 		return value;
 	}
-
-
-	public static double haverDist(double[]p1, double[]p2) {
-		double earthRadius = 6371000d; //m
-		double dLat = Math.toRadians(p2[0]-p1[0]);
-		double dLng = Math.toRadians(p2[1]-p1[1]);
-		double sindLat = Math.sin(dLat / 2);
-		double sindLng = Math.sin(dLng / 2);
-		double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
-				* Math.cos(Math.toRadians(p1[0])) * Math.cos(Math.toRadians(p2[0]));
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-		double dist = earthRadius * c;
-		return round(dist,3);
-	}
-
-	static double round(double x, int position)
-	{
-		double a = x;
-		double temp = Math.pow(10.0, position);
-		a *= temp;
-		a = Math.round(a);
-		return (a / (double)temp);
-	}
-
 }

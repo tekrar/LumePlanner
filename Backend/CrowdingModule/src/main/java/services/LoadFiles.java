@@ -91,9 +91,9 @@ public class LoadFiles {
 //		//l.callsDistribution();
 //	}
 
-	public Map<String, List<UncertainValue>> load(Mongo dao) {
+	public Map<String, List<UncertainValue>> load(Mongo dao, String baseDir) {
 
-		baseDir = this.getClass().getResource("/../data/"+p.getProperty("data.dir")).getPath();
+		this.baseDir = baseDir;
 
 		roads_lengths = loadGridRoads();
 

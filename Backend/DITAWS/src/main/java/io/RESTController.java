@@ -12,17 +12,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import model.Activity;
-import model.CrowdingFeedback;
-import model.GridCrowding;
-import model.OverallFeedback;
-import model.POI;
-import model.PlanRequest;
-import model.UncertainValue;
-import model.User;
-import model.Visit;
-import model.VisitPlan;
-import model.VisitPlanAlternatives;
+import model.*;
 
 import org.apache.log4j.Logger;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -84,11 +74,14 @@ public class RESTController {
 	private static TreeMap<String, TreeMap<String, Double>> distances;
 
 	public RESTController() {
-		dao = new Mongo();
-		hopper = new GraphHopper().forServer();
 		p = new Properties();
 		try {
 			p.load(this.getClass().getClassLoader().getResourceAsStream("DITA.properties"));
+
+			dao = new Mongo(p.getProperty("mongo.db"), p.getProperty("mongo.user"), p.getProperty("mongo.password"));
+			hopper = new GraphHopper().forServer();
+
+
 			data_path = this.getClass().getResource("/../data/"+p.getProperty("data.dir")).getPath();
 			hopper.setInMemory();
 			hopper.setOSMFile(data_path+"bbox.osm");
@@ -127,6 +120,14 @@ public class RESTController {
 	@RequestMapping(value = "signup", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody boolean performSignup(@RequestBody User user) {
 		return dao.Signup(user);
+	}
+
+
+	@RequestMapping(value = "selectcity", headers="Accept=application/json", method = RequestMethod.POST)
+	public @ResponseBody boolean selectCity(@RequestBody CitySelection citySelection) {
+		logger.info(citySelection.getEmail()+" ---- is in ---> "+citySelection.getCity());
+		dao = new Mongo("lume-"+citySelection.getCity(), p.getProperty("mongo.user"), p.getProperty("mongo.password"));
+		return true;
 	}
 
 

@@ -60,6 +60,11 @@ angular
                     url: '/overview',
                     templateUrl: 'modules/core/views/overview.html',
                     controller: 'OverviewController'
+                })
+                .state('city', {
+                    url: '/city',
+                    templateUrl: 'modules/core/views/city.html',
+                    controller: 'CityController'
                 });
         }
     ]);

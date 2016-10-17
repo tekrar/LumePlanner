@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-	<display-name>DITA Venice WS</display-name>
+	<display-name>DITA WS</display-name>
 
 	<servlet>
 		<servlet-name>controller</servlet-name>

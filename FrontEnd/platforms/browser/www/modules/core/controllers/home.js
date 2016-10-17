@@ -12,8 +12,8 @@
  */
 angular
     .module('core')
-    .controller('HomeController', ['$scope', '$http', '$location', 'storeConfig', 'storeUser', 'visitPlan', 'passData', 'currentView', 'selectedPOIs', 'storeDeparture', 'storeArrival', 'storeTime', 'loadedPOIs', 'storePOIs', 'storeSlider',
-				   function($scope, $http, $location, storeConfig, storeUser, visitPlan, passData, currentView, selectedPOIs, storeDeparture, storeArrival, storeTime, loadedPOIs, storePOIs, storeSlider) {
+    .controller('HomeController', ['$scope', '$http', '$location', 'storeConfig', 'storeUser', 'visitPlan', 'passData', 'currentView', 'city' ,'selectedPOIs', 'storeDeparture', 'storeArrival', 'storeTime', 'loadedPOIs', 'storePOIs', 'storeSlider',
+				   function($scope, $http, $location, storeConfig, storeUser, visitPlan, passData, currentView, city, selectedPOIs, storeDeparture, storeArrival, storeTime, loadedPOIs, storePOIs, storeSlider) {
 				       $scope.load = true;
 				       $scope.load_plan = false;
 				       //load config
@@ -26,6 +26,10 @@ angular
 					   currentView.set('Login page');
 					   $location.path('sign');
 				       } else {
+
+						console.log("-------"+city.get());
+						   $scope.city = city.get();
+
 					   //get list of POIs
 					   if (!loadedPOIs.get()) {
 					       $http.get(storeConfig.get().dita_server+'activities').

@@ -59,7 +59,7 @@ public class Mongo {
 
 	private java.util.logging.Logger mongoLogger;
 
-	public Mongo () {
+	public Mongo (String nameDB, String userDB, String pwdDB) {
 
 		CodecRegistry codecRegistry = 
 				CodecRegistries.fromRegistries(
@@ -79,11 +79,11 @@ public class Mongo {
 			mongoClient = new MongoClient(new ServerAddress(p.getProperty("mongo.url")),
 					Arrays.asList(
 							MongoCredential.createCredential(
-									p.getProperty("mongo.user"),
-									p.getProperty("mongo.db"),
-									p.getProperty("mongo.password").toCharArray())),
+									userDB,//p.getProperty("mongo.user"),
+									nameDB,//p.getProperty("mongo.db"),
+									pwdDB.toCharArray())),//p.getProperty("mongo.password").toCharArray())),
 									MongoClientOptions.builder().codecRegistry(codecRegistry).build());
-			db = mongoClient.getDatabase(p.getProperty("mongo.db"));
+			db = mongoClient.getDatabase(nameDB);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
