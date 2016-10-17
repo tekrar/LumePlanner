@@ -440,3 +440,16 @@ angular
         }
       }
     });
+
+  angular.module(ApplicationConfiguration.applicationModuleName).factory('city', function() {
+    var city;
+    return {
+      set: function(item) {
+        city = item;
+      },
+      get: function() {
+        return city;
+      }
+    }
+
+  });

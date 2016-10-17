@@ -21,7 +21,7 @@ angular
             $scope.user = {password: "", email: ""};
             $scope.$watch('user.email', function() {
               var string = ""+$scope.user.email;
-              var patt = new RegExp(/^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/);
+              var patt = new RegExp(/^([a-zA-Z0-9]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/);
               var res = (string.indexOf('.') !== -1) ? patt.test(string) : (string.length < 3) ? true : false;
               $scope.valid_email = res;
               $scope.already = false;
@@ -42,6 +42,7 @@ angular
             $scope.load = true;
             console.log(user_obj.email);
             console.log(user_obj.password);
+              console.log(JSON.stringify(hashed_user));
             $http.post(storeConfig.get().dita_server+'signin', hashed_user).
               success(function(data) {
                 console.log(data);
@@ -54,9 +55,9 @@ angular
                   $location.path('plan');
                 } else if(data==='1' || data === 1) { //first login or a visiting plan doesn't exist
                   storeUser.setUser(hashed_user);
-                  currentView.set('home');
+                  currentView.set('city');  // was home
                   $( "div" ).removeClass("background");
-                  $location.path('home');
+                  $location.path('city'); // was home
                 } else if (data==='0' || data === 0) { //wrong password
                   $scope.wrong = true;
                   $scope.registered = false;
@@ -77,8 +78,9 @@ angular
               });
           };
 
-            $scope.signup = function(user_obj) {
-		$scope.load = true;
+
+          $scope.signup = function(user_obj) {
+		    $scope.load = true;
 		var hashed_user = {email: user_obj.email.toLowerCase(), password: md5.createHash(user_obj.password)};
 		console.log(JSON.stringify(hashed_user));
 

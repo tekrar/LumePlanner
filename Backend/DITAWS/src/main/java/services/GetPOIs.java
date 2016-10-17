@@ -28,8 +28,14 @@ public class GetPOIs  {
 	
 	public static void main(String[] args) throws Exception  {
 		GetPOIs g = new GetPOIs();
-		Mongo dao = new Mongo();
 		String dir = "C:\\Users\\marco\\Desktop\\AppVenezia\\Backend\\DITAWS\\src\\main\\webapp\\WEB-INF\\data\\";
+
+
+
+
+		Mongo dao = new Mongo("dita","lume-modena","mames1976");
+
+
 		g.run(dao, dir);
 	}
 
@@ -38,7 +44,6 @@ public class GetPOIs  {
 	private Logger logger = Logger.getLogger(RESTController.class);
 	public void run(Mongo dao, String dataPath) {
 
-		p = new Properties();
 		
 		Map<String, Integer> ratings = new HashMap<>();//new SocialPulse().loadStars();
 
@@ -49,7 +54,7 @@ public class GetPOIs  {
 		BufferedReader url_br; //url API
 
 		try {
-			p.load(this.getClass().getClassLoader().getResourceAsStream("DITA.properties"));
+
 
 			for (int i=0; i<POICategories.length;i++)  {
 				File file = new File(dataPath+"nominatim/"+POICategories[i]);

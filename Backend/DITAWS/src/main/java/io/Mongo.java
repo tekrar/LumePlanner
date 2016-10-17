@@ -69,7 +69,7 @@ public class Mongo {
 
 	private java.util.logging.Logger mongoLogger;
 
-	public Mongo () {
+	public Mongo (String a, String b, String c) {
 
 		CodecRegistry codecRegistry = 
 				CodecRegistries.fromRegistries(

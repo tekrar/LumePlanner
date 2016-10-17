@@ -4,7 +4,7 @@ var conf;
 // Init the application configuration module for AngularJS application
 var ApplicationConfiguration = (function() {
     // Init module configuration options
-    var applicationModuleName = 'Venice On Your Fingers';
+    var applicationModuleName = 'Lume Planner';
     var applicationModuleVendorDependencies = ['ngResource', 'ngCookies', 'ngAnimate', 'ngTouch', 'ngSanitize', 'ui.router', 'ui.bootstrap', 'ui.utils', 'leaflet-directive', 'angular-md5'];
 
     // Add a new vertical module
