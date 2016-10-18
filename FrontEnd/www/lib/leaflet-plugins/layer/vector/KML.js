@@ -196,7 +196,7 @@ L.Util.extend(L.KML, {
 			}
 		}
 		
-		return;
+
 	},
 
 	parseFolder: function (xml, style) {

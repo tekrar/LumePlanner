@@ -447,7 +447,7 @@ function osbResponse(error)
 	if(error)
 		alert('Error: '+error);
 
-	return;
+
 }
 
 putAJAXMarker.layers = [ ];

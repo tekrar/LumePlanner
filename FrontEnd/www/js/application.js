@@ -41,7 +41,7 @@ angular
 
     angular.module(ApplicationConfiguration.applicationModuleName).factory('storeUser', function() {
       var user = null;
-      var token = null
+      var token = null;
 
       return {
         setUser: function(item) {
@@ -68,8 +68,8 @@ angular
         arrival         : {},
         departure_time  : "",
         arrival_time    : "",
-        to_visit        : new Array(),
-        visited         : new Array(),
+        to_visit        : [],
+        visited         : [],
         crowding        : 0.0,
         hash            : 0
       };
@@ -183,14 +183,14 @@ angular
     });
 
     angular.module(ApplicationConfiguration.applicationModuleName).factory('loadedPOIs', function() {
-      var loaded = false;
+      var loaded_city = "";
 
       return {
-        set: function(bool) {
-          loaded = bool;
+        set: function(city) {
+          loaded_city = city;
         },
         get: function() {
-          return loaded;
+          return loaded_city;
         }
       }
     });
@@ -208,6 +208,18 @@ angular
       };
 
       return {
+
+        clear: function() {
+          POIS.hotels = [];
+          POIS.attractions = [];
+          POIS.monuments = [];
+          POIS.museums = [];
+          POIS.restaurants = [];
+          POIS.parks = [];
+          POIS.historical = [];
+          POIS.religious = [];
+        },
+
         addHotel: function(item) {
           POIS.hotels.push(item);
         },

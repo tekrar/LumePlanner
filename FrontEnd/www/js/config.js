@@ -27,8 +27,7 @@ var ApplicationConfiguration = (function() {
     "osm_tile" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     "home_gg_marker" : "https://chart.googleapis.com/chart?chst=d_map_pin_icon&chld=home|0099ff",
     "pin_gg_marker" : "https://chart.googleapis.com/chart?chst=d_map_pin_letter"
-    }
-
+    };
     return {
         applicationModuleName: applicationModuleName,
         applicationModuleVendorDependencies: applicationModuleVendorDependencies,

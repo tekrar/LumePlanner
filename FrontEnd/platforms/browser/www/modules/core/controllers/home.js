@@ -30,11 +30,15 @@ angular
 						console.log("-------"+city.get());
 						   $scope.city = city.get();
 
-					   //get list of POIs
-					   if (!loadedPOIs.get()) {
+
+
+						   console.log(loadedPOIs.get()+" != "+city.get()+"  "+(loadedPOIs.get() != city.get()))
+
+					   //get list of POIs -------------------------------------------------------------------
+					   if (loadedPOIs.get() != city.get()) {
 					       $http.get(storeConfig.get().dita_server+'activities').
 						   success(function(data) {
-
+							   storePOIs.clear();
 						       //save data into vars
 						       angular.forEach(data, function(value) {
 							   //value.display_name = value.display_name.replace(/[^\x00-\x7F]/g, "'"); //remove non-ASCII chars (done on the server)
@@ -71,7 +75,7 @@ angular
 						       $scope.religious_sites = selectedPOIs.getReligious_sites().length;
 
 						       $scope.load = false;
-						       loadedPOIs.set(true);
+						       loadedPOIs.set(city.get());
 						   }).
 						   error(function(data) {
 						       //error
@@ -218,6 +222,12 @@ angular
 					       default : console.log("Invalid view:"+view);
 					       }
 					       $location.path('visits');
+					   };
+
+
+					   $scope.go_city_selection = function() {
+						   console.log("go back");
+						   $location.path('city');
 					   };
 
 					   $scope.requestPlan = function() {

@@ -99,6 +99,7 @@ public class Mongo {
 									pwdDB.toCharArray())),
 									MongoClientOptions.builder().codecRegistry(codecRegistry).build());
 			db = mongoClient.getDatabase(nameDB);
+			logger.info("loading new db "+nameDB+" .....");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -233,11 +234,8 @@ public class Mongo {
 	}
 
 	public boolean checkActivities(){
-		if (db.getCollection("activities").count() == 0l) {
-			return false;
-		}
-		return true;
-	}
+        return db.getCollection("activities").count() != 0l;
+    }
 
 	public POI retrieveActivity(String place_id) {
 		try {
@@ -275,11 +273,8 @@ public class Mongo {
 	}
 
 	public boolean checkDistances(){
-		if (db.getCollection("distances").count() == 0l) {
-			return false;
-		}
-		return true;
-	}
+        return db.getCollection("distances").count() != 0l;
+    }
 
 	public TreeMap<String, TreeMap<String, Double>> retrieveDistances() {
 		TreeMap<String, TreeMap<String, Double>> result = new TreeMap<>();
@@ -375,11 +370,8 @@ public class Mongo {
 	}
 
 	public boolean checkTravelTimes(){
-		if (db.getCollection("timings").count() == 0l) {
-			return false;
-		}
-		return true;
-	}
+        return db.getCollection("timings").count() != 0l;
+    }
 
 	public Map<String, HashMap<String, List<UncertainValue>>> retrieveTravelTimes() {
 		Map<String, HashMap<String, List<UncertainValue>>> result = new HashMap<>();
@@ -436,7 +428,7 @@ public class Mongo {
 	public Integer Login(User user) {
 		Document userRecord = db.getCollection("users").find(new Document("id", UUID.nameUUIDFromBytes(user.getEmail().getBytes()).toString())).first();
 		if (null != userRecord) {
-			if (((String)userRecord.get("password")).equals(user.getPassword())) {
+			if (userRecord.get("password").equals(user.getPassword())) {
 				logger.info("User "+user.getEmail()+" successfully logged in");
 				if (null == db.getCollection("plans").find(new Document("crowd_related.user", user.getEmail())).first()) {
 					return 1;

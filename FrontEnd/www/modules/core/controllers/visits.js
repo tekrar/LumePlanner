@@ -34,7 +34,7 @@ angular
               return false;
             }
             return true;
-          }
+          };;;
 
           $scope.items = passData.get().sort(function(item1, item2) {
             return (item1.display_name > item2.display_name) - (item1.display_name < item2.display_name);

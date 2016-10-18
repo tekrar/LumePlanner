@@ -88,11 +88,11 @@ var writeController = function(script, examplefile, controllers_directory) {
                 df.resolve();
             });
         } else {
-            console.log('The controller name is duplicated: ' + outfilename)
+            console.log('The controller name is duplicated: ' + outfilename);
             df.reject();
         }
     } else {
-        console.log('Can\'t identify the controller name in the example ' + examplefile)
+        console.log('Can\'t identify the controller name in the example ' + examplefile);
         df.reject();
     }
 
