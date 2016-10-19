@@ -31,33 +31,25 @@ public class RESTController {
 	private Logger logger = Logger.getLogger(RESTController.class);
 	private boolean initialized = false;
 
-
 	private static Map<String,CityData> cityDataMap;
-	private static CityData cityData;
+
 	public RESTController() {
 		cityDataMap = new HashMap<>();
 		cityDataMap.put("Modena",new CityData("Modena"));
-		cityData = cityDataMap.get("Modena");
+		cityDataMap.put("Venezia",new CityData("Venezia"));
 	}
-
-
+	
 
 	@RequestMapping(value = "signin", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody Integer performLogin(@RequestBody User user) {
-		return cityData.login(user);
+		String city = "Modena";
+		return cityDataMap.get(city).login(user);
 	}
 
 	@RequestMapping(value = "signup", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody boolean performSignup(@RequestBody User user) {
-		return cityData.signup(user);
-	}
-
-
-	@RequestMapping(value = "selectcity", headers="Accept=application/json", method = RequestMethod.POST)
-	public @ResponseBody boolean selectCity(@RequestBody CitySelection citySelection) {
-		logger.info(citySelection.getEmail()+" ---- is in ---> "+citySelection.getCity());
-		//dao = new Mongo("lume-"+citySelection.getCity(), p.getProperty("mongo.user"), p.getProperty("mongo.password"));
-		return true;
+		String city = "Modena";
+		return cityDataMap.get(city).signup(user);
 	}
 
 
@@ -68,9 +60,6 @@ public class RESTController {
 	 */
 	public void init() {
 		logger.info("Server initialization started");
-
-
-
 
 		//new SocialPulse().writeCrowdPOI();
 		//logger.info("POI written");
@@ -87,7 +76,10 @@ public class RESTController {
 
 		initCrowdingModule();
 
-		cityData.init();
+		for(String city : cityDataMap.keySet()) {
+			logger.info("\n*********************************** "+city+" ***********************************\n");
+			cityDataMap.get(city).init();
+		}
 
 		initialized = true;
 
@@ -148,10 +140,10 @@ public class RESTController {
 			hourFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Rome"));
 			String hour = hourFormatter.format(d);
 			String minute = minuteFormatter.format(d);
-
+			String city = "Modena";
 			logger.info("Server update request at "+hour+":"+minute);
 
-			cityData.updateCongestions();
+			cityDataMap.get(city).updateCongestions();
 
 
 			//travel_times = DOCIT.getTravelTime(POIs);
@@ -171,8 +163,7 @@ public class RESTController {
 	@RequestMapping(value = "activities", headers="Accept=application/json", method = RequestMethod.GET)
 	public @ResponseBody List<POI> sendActivities(@RequestParam(value="city", defaultValue="unknown") String city) {
 		logger.info(city);
-		Mongo daox = new Mongo("lume-"+city);
-		return daox.retrieveActivities();
+		return cityDataMap.get(city).retrieveActivities();
 	}
 
 	/**
@@ -183,7 +174,7 @@ public class RESTController {
 
 	@RequestMapping(value = "newplan", method = RequestMethod.POST, headers = {"content-type=application/json"})
 	public @ResponseBody VisitPlanAlternatives getNewVisitPlan(@RequestBody PlanRequest plan_request) {
-
+		String city = plan_request.getCity();
 		POI start = plan_request.getStart_place();
 		POI end = plan_request.getEnd_place();
 		String start_time = plan_request.getStart_time();
@@ -191,13 +182,12 @@ public class RESTController {
 		List<String> POIsList = new ArrayList<String>();
 		POI departure = null;
 		POI arrival = null;
-		String city = "Modena";
+
 		//List<Activity> result = new ArrayList<Activity>();
 		if (start.getPlace_id().equals("0")) {
 			if (!new PointWithinBBox(city).check(start.getGeometry().getCoordinates())) {
 				//result.add(new Activity("0"));
-				return new VisitPlanAlternatives(new VisitPlan(), new VisitPlan(), 
-						new VisitPlan(new POI("0")), 0);
+				return new VisitPlanAlternatives(city,new VisitPlan(), new VisitPlan(), new VisitPlan(new POI("0")), 0);
 			}
 			departure = new POI("0", 
 					start.getGeometry().getCoordinates().getLatitude(), 
@@ -210,8 +200,7 @@ public class RESTController {
 		if (end.getPlace_id().equals("0")) {
 			if (!new PointWithinBBox(city).check(end.getGeometry().getCoordinates())) {
 				//result.add(new Activity("00"));
-				return new VisitPlanAlternatives(new VisitPlan(), new VisitPlan(),
-						new VisitPlan(new POI("00")), 0);
+				return new VisitPlanAlternatives(city, new VisitPlan(), new VisitPlan(), new VisitPlan(new POI("00")), 0);
 			}
 			arrival = new POI("00", 
 					end.getGeometry().getCoordinates().getLatitude(), 
@@ -232,21 +221,24 @@ public class RESTController {
 		for (String poi : pois) {
 			POIsList.add(poi);
 		}
+
+
+
 		logger.info("USER: "+plan_request.getUser()+"   "+"TIME: "+plan_request.getStart_time());
-		logger.info("CITY: "+plan_request.getCity());
+		logger.info("CITY: "+city);
 		logger.info("PLAN REQUEST: "+POIsList.toString()+"\n");
 		logger.info("DEP: "+departure.toString());
 		logger.info("ARR: "+arrival.toString());
 
-		VisitPlan greedy = new FindGreedyPath().newPlan(cityData, plan_request.getUser(), departure, arrival, start_time, POIsList);
+		VisitPlan greedy = new FindGreedyPath().newPlan(cityDataMap.get(city), plan_request.getUser(), departure, arrival, start_time, POIsList);
 		logger.info("Greedy computed " + greedy.getUser());
-		VisitPlan shortest = new FindShortestPath().newPlan(cityData, plan_request.getUser(), departure, arrival, start_time, POIsList);
+		VisitPlan shortest = new FindShortestPath().newPlan(cityDataMap.get(city), plan_request.getUser(), departure, arrival, start_time, POIsList);
 		logger.info("Shortest computed " + shortest.getUser());
-		VisitPlan lesscrowded = new FindCrowdRelatedPath().newPlan(cityData, plan_request.getUser(), departure, arrival, start_time, POIsList, plan_request.getCrowd_preference());
+		VisitPlan lesscrowded = new FindCrowdRelatedPath().newPlan(cityDataMap.get(city), plan_request.getUser(), departure, arrival, start_time, POIsList, plan_request.getCrowd_preference());
 		logger.info("Crowd Related computed " + lesscrowded.getUser());
 
 		logger.info("newPlan user:"+plan_request.getUser());
-		return new VisitPlanAlternatives(greedy, shortest, lesscrowded, plan_request.getCrowd_preference());
+		return new VisitPlanAlternatives(city, greedy, shortest, lesscrowded, plan_request.getCrowd_preference());
 	}
 
 
@@ -286,10 +278,11 @@ public class RESTController {
 		//			warning_count+=1;
 		//		}
 		//		if (warning_count==3) return false;
-		return acceptVisitPlanWithType(0, plans);
+		String city = plans.getCity();
+		return acceptVisitPlanWithType(cityDataMap.get(city), 0, plans);
 	}
 
-	public boolean acceptVisitPlanWithType(int type, VisitPlanAlternatives plans) {
+	public boolean acceptVisitPlanWithType(CityData cityData, int type, VisitPlanAlternatives plans) {
 		if (!cityData.insertPlan(plans)) return false;
 
 		VisitPlan plan_accepted = null;
@@ -326,7 +319,7 @@ public class RESTController {
 			arr_t = plan_accepted.getTo_visit().get(i).getArrival_time();
 			dep_t = plan_accepted.getTo_visit().get(i).getDeparture_time();
 			cityData.increaseOccupancies(to, arr_t, dep_t);
-			while (warning_count< 3 && !restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/i/"+from+"/"+to+"/"+TimeUtils.getMillis(time), Boolean.class)) {
+			while (warning_count< 3 && !restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+cityData.city+"/i/"+from+"/"+to+"/"+TimeUtils.getMillis(time), Boolean.class)) {
 				warning_count+=1;
 			}
 			if (warning_count==3) return false;
@@ -335,7 +328,7 @@ public class RESTController {
 			time = plan_accepted.getTo_visit().get(i).getDeparture_time();
 		}
 		to = (plan_accepted.getArrival().getPlace_id() =="00") ? cityData.retrieveClosestActivity(plan_accepted.getArrival()).getPlace_id() : plan_accepted.getArrival().getPlace_id();
-		while (warning_count< 3 && !restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/i/"+from+"/"+to+"/"+TimeUtils.getMillis(time), Boolean.class)) {
+		while (warning_count< 3 && !restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+cityData.city+"/i/"+from+"/"+to+"/"+TimeUtils.getMillis(time), Boolean.class)) {
 			warning_count+=1;
 		}
 		if (warning_count==3) {
@@ -348,120 +341,49 @@ public class RESTController {
 
 	@RequestMapping(value = "plan", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody VisitPlanAlternatives getPlan(@RequestBody User user) {
-		return cityData.retrievePlan(user.getEmail());
+		String city = "Modena";
+		return cityDataMap.get(city).retrievePlan(user.getEmail());
 	}
 
 
 	@RequestMapping(value = "crowding_fdbk", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody boolean setCrowdingFdbk(@RequestBody CrowdingFeedback fdbk) {
+
+		String city = fdbk.getCity();
+
 		logger.info("Crowding Feedback from "+fdbk.getUser());
 		logger.info("on Path "+fdbk.getDeparture().getPlace_id()+"-"+fdbk.getArrival().getPlace_id()+" ("+fdbk.getDeparture_time()+") ");
 		logger.info("Value "+fdbk.getChoice());
 
-		UncertainValue value = restTemplate.getForObject(CROWDING_MODULE_URL+"crowding_fdbk/{user}/{departure}/{arrival}/{dep_time}/{choice}",
+		UncertainValue value = restTemplate.getForObject(CROWDING_MODULE_URL+"crowding_fdbk/{city}/{user}/{departure}/{arrival}/{dep_time}/{choice}",
 				UncertainValue.class,
 				fdbk.getUser(),	
 				fdbk.getDeparture().getPlace_id(), 
 				fdbk.getArrival().getPlace_id(), 
 				fdbk.getDeparture_time(), 
 				fdbk.getChoice());
-		return cityData.updateUser(fdbk, value);
+		return cityDataMap.get(city).updateUser(fdbk, value);
 	}
 
 
 	@RequestMapping(value = "visited", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody VisitPlanAlternatives addVisitedAndReplan(@RequestBody Visit new_visited) {
-//		VisitPlanAlternatives plans = dao.updatePlan(new_visited);
-//		if (null == plans) return null;
-//
-//		logger.info(plans.toString());
-//		VisitPlan v = plans.getCrowd_related();
-//		logger.info(v.toString());
-//		if (!v.getTo_visit().isEmpty()) {
-//			List<String> pois = new ArrayList<String>();
-//
-//			for (Activity to_visit : v.getTo_visit()) {
-//				pois.add(to_visit.getVisit().getPlace_id());
-//			}
-//			if (!v.getArrival().equals(new_visited.getVisited())) {
-//				pois.add(new_visited.getVisited().getPlace_id());
-//			}
-//			pois.add(v.getArrival().getPlace_id());	
-//
-//			//String data_path = this.getClass().getResource("/../data/").getPath();
-//
-//			VisitPlan leastCrowded = new FindCrowdRelatedPath().updatePlan(dao, new_visited, plans.getCrowd_related(), pois, activities, distances, travel_times, crowding_levels, occupancies, plans.getCrowd_preference(), hopper);
-//			for (int i=0; i<v.getTo_visit().size();i++) {
-//				Activity to_visit = v.getTo_visit().get(i);
-//				for (int j=0; j<leastCrowded.getTo_visit().size(); j++) {
-//					boolean different_arr_time = false;
-//					Activity to_visit_new = v.getTo_visit().get(j);
-//					if (to_visit.getVisit().getPlace_id().equals(to_visit_new.getVisit().getPlace_id())) {
-//						if (!to_visit.getArrival_time().equals(to_visit_new.getArrival_time())) {
-//							if (i==0) { //decrease crowding level from last visited to first activity to visit
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/d/"+new_visited.getVisited().getPlace_id()+"/"+to_visit.getVisit().getPlace_id()+"/"+new_visited.getTime(), Boolean.class);
-//								logger.info("Updated (dec) crowding level from "+new_visited.getVisited().getPlace_id()+" to "+to_visit.getVisit().getPlace_id()+" at "+TimeUtils.getStringTime(new_visited.getTime()));
-//							} else {
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/d/"+v.getTo_visit().get(i-1).getVisit().getPlace_id()+"/"+to_visit.getVisit().getPlace_id()+"/"+TimeUtils.getMillis(v.getTo_visit().get(i-1).getDeparture_time()), Boolean.class);
-//								logger.info("Updated (dec) crowding level from "+v.getTo_visit().get(i-1).getVisit().getPlace_id()+" to "+to_visit.getVisit().getPlace_id()+" at "+v.getTo_visit().get(i-1).getDeparture_time());
-//							}
-//							if (j==0) { //increase crowding level from last visited to first activity to visit
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/i/"+new_visited.getVisited().getPlace_id()+"/"+to_visit_new.getVisit().getPlace_id()+"/"+new_visited.getTime(), Boolean.class);
-//								logger.info("Updated (inc) crowding level from "+new_visited.getVisited().getPlace_id()+" to "+to_visit_new.getVisit().getPlace_id()+" at "+TimeUtils.getStringTime(new_visited.getTime()));
-//							} else {
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/i/"+leastCrowded.getTo_visit().get(j-1).getVisit().getPlace_id()+"/"+to_visit_new.getVisit().getPlace_id()+"/"+TimeUtils.getMillis(leastCrowded.getTo_visit().get(j-1).getDeparture_time()), Boolean.class);
-//								logger.info("Updated (inc) crowding level from "+leastCrowded.getTo_visit().get(j-1).getVisit().getPlace_id()+" to "+to_visit_new.getVisit().getPlace_id()+" at "+leastCrowded.getTo_visit().get(j-1).getDeparture_time());
-//							}
-//							occupancies = new Occupancies().decrease(to_visit.getVisit().getPlace_id(), to_visit.getArrival_time(), to_visit.getDeparture_time(), occupancies);
-//							logger.info("Updated (dec) occupancy from "+to_visit.getArrival_time()+" to "+to_visit.getDeparture_time()+" at "+to_visit.getVisit().getPlace_id());
-//							occupancies = new Occupancies().increase(to_visit_new.getVisit().getPlace_id(), to_visit_new.getArrival_time(), to_visit_new.getDeparture_time(), occupancies);
-//							logger.info("Updated (inc) occupancy from "+to_visit_new.getArrival_time()+" to "+to_visit_new.getDeparture_time()+" at "+to_visit_new.getVisit().getPlace_id());
-//							different_arr_time = true;
-//						}
-//						if (!to_visit.getDeparture_time().equals(to_visit_new.getDeparture_time())) {
-//							if (i==v.getTo_visit().size()-1) { //decrease crowding level from last activity to visit to the arrival location
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/d/"+to_visit.getVisit().getPlace_id()+"/"+v.getArrival().getPlace_id()+"/"+TimeUtils.getMillis(to_visit.getDeparture_time()), Boolean.class);
-//								logger.info("Updated (dec) crowding level from "+to_visit.getVisit().getPlace_id()+" to "+v.getArrival().getPlace_id()+" at "+to_visit.getDeparture_time());
-//							} else {
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/d/"+to_visit.getVisit().getPlace_id()+"/"+v.getTo_visit().get(i+1).getVisit().getPlace_id()+"/"+TimeUtils.getMillis(to_visit.getDeparture_time()), Boolean.class);
-//								logger.info("Updated (dec) crowding level from "+to_visit.getVisit().getPlace_id()+" to "+v.getTo_visit().get(i+1).getVisit().getPlace_id()+" at "+to_visit.getDeparture_time());
-//							}
-//							if (j==leastCrowded.getTo_visit().size()-1) { //decrease crowding level from last activity to visit to the arrival location
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/i/"+to_visit_new.getVisit().getPlace_id()+"/"+leastCrowded.getArrival().getPlace_id()+"/"+TimeUtils.getMillis(to_visit_new.getDeparture_time()), Boolean.class);
-//								logger.info("Updated (inc) crowding level from "+to_visit_new.getVisit().getPlace_id()+" to "+leastCrowded.getArrival().getPlace_id()+" at "+to_visit_new.getDeparture_time());
-//							} else {
-//								restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/i/"+to_visit_new.getVisit().getPlace_id()+"/"+leastCrowded.getTo_visit().get(j+1).getVisit().getPlace_id()+"/"+TimeUtils.getMillis(to_visit_new.getDeparture_time()), Boolean.class);
-//								logger.info("Updated (inc) crowding level from "+to_visit_new.getVisit().getPlace_id()+" to "+leastCrowded.getTo_visit().get(j+1).getVisit().getPlace_id()+" at "+to_visit_new.getDeparture_time());
-//							}
-//							if (!different_arr_time) {
-//								occupancies = new Occupancies().decrease(to_visit.getVisit().getPlace_id(), to_visit.getArrival_time(), to_visit.getDeparture_time(), occupancies);
-//								logger.info("Updated (dec) occupancy from "+to_visit.getArrival_time()+" to "+to_visit.getDeparture_time()+" at "+to_visit.getVisit().getPlace_id());
-//								occupancies = new Occupancies().increase(to_visit_new.getVisit().getPlace_id(), to_visit_new.getArrival_time(), to_visit_new.getDeparture_time(), occupancies);
-//								logger.info("Updated (inc) occupancy from "+to_visit_new.getArrival_time()+" to "+to_visit_new.getDeparture_time()+" at "+to_visit_new.getVisit().getPlace_id());
-//							}
-//						}
-//					}
-//				}
-//			}
-//			//restTemplate.getForObject(p.getProperty("crowdingmodule.url")+"crowding/i/"+from+"/"+to+"/"+TimeUtils.getMillis(time), Boolean.class)
-//			return new VisitPlanAlternatives(
-//					new FindGreedyPath().updatePlan(dao, new_visited, plans.getGreedy(), pois, activities, distances, travel_times, crowding_levels, occupancies, hopper),
-//					new FindShortestPath().updatePlan(dao, new_visited, plans.getShortest(), pois, activities, distances, travel_times, crowding_levels, occupancies, hopper),
-//					leastCrowded, plans.getCrowd_preference());
-//		}
-
-		return addVisitedAndReplanWithType(0, new_visited);
+		String city = new_visited.getCity();
+		logger.info("++++++++++++++++++++++"+city);
+		return addVisitedAndReplanWithType(cityDataMap.get(city), 0, new_visited);
 
 	}
 
 
-	public VisitPlanAlternatives addVisitedAndReplanWithType(int type, Visit new_visited) {
+	public VisitPlanAlternatives addVisitedAndReplanWithType(CityData cityData, int type, Visit new_visited) {
 		VisitPlanAlternatives plans = cityData.updatePlan(new_visited);
 		if (null == plans) return null;
 
 		//logger.info(plans.toString());
 		VisitPlan currentP = null;
-		
+
+
+		String city = new_visited.getCity();
 
 		switch (type) {
 		case 1: // greedy
@@ -509,17 +431,17 @@ public class RESTController {
 					if (to_visit.getVisit().getPlace_id().equals(to_visit_new.getVisit().getPlace_id())) {
 						if (!to_visit.getArrival_time().equals(to_visit_new.getArrival_time())) {
 							if (i==0) { //decrease crowding level from last visited to first activity to visit
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/d/"+new_visited.getVisited().getPlace_id()+"/"+to_visit.getVisit().getPlace_id()+"/"+new_visited.getTime(), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/d/"+new_visited.getVisited().getPlace_id()+"/"+to_visit.getVisit().getPlace_id()+"/"+new_visited.getTime(), Boolean.class);
 								logger.info("Updated (dec) crowding level from "+new_visited.getVisited().getPlace_id()+" to "+to_visit.getVisit().getPlace_id()+" at "+TimeUtils.getStringTime(new_visited.getTime()));
 							} else {
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/d/"+currentP.getTo_visit().get(i-1).getVisit().getPlace_id()+"/"+to_visit.getVisit().getPlace_id()+"/"+TimeUtils.getMillis(currentP.getTo_visit().get(i-1).getDeparture_time()), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/d/"+currentP.getTo_visit().get(i-1).getVisit().getPlace_id()+"/"+to_visit.getVisit().getPlace_id()+"/"+TimeUtils.getMillis(currentP.getTo_visit().get(i-1).getDeparture_time()), Boolean.class);
 								logger.info("Updated (dec) crowding level from "+currentP.getTo_visit().get(i-1).getVisit().getPlace_id()+" to "+to_visit.getVisit().getPlace_id()+" at "+currentP.getTo_visit().get(i-1).getDeparture_time());
 							}
 							if (j==0) { //increase crowding level from last visited to first activity to visit
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/i/"+new_visited.getVisited().getPlace_id()+"/"+to_visit_new.getVisit().getPlace_id()+"/"+new_visited.getTime(), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/i/"+new_visited.getVisited().getPlace_id()+"/"+to_visit_new.getVisit().getPlace_id()+"/"+new_visited.getTime(), Boolean.class);
 								logger.info("Updated (inc) crowding level from "+new_visited.getVisited().getPlace_id()+" to "+to_visit_new.getVisit().getPlace_id()+" at "+TimeUtils.getStringTime(new_visited.getTime()));
 							} else {
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/i/"+newP.getTo_visit().get(j-1).getVisit().getPlace_id()+"/"+to_visit_new.getVisit().getPlace_id()+"/"+TimeUtils.getMillis(newP.getTo_visit().get(j-1).getDeparture_time()), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/i/"+newP.getTo_visit().get(j-1).getVisit().getPlace_id()+"/"+to_visit_new.getVisit().getPlace_id()+"/"+TimeUtils.getMillis(newP.getTo_visit().get(j-1).getDeparture_time()), Boolean.class);
 								logger.info("Updated (inc) crowding level from "+newP.getTo_visit().get(j-1).getVisit().getPlace_id()+" to "+to_visit_new.getVisit().getPlace_id()+" at "+newP.getTo_visit().get(j-1).getDeparture_time());
 							}
 							cityData.decreaseOccupancies(to_visit.getVisit().getPlace_id(), to_visit.getArrival_time(), to_visit.getDeparture_time());
@@ -530,17 +452,17 @@ public class RESTController {
 						}
 						if (!to_visit.getDeparture_time().equals(to_visit_new.getDeparture_time())) {
 							if (i==currentP.getTo_visit().size()-1) { //decrease crowding level from last activity to visit to the arrival location
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/d/"+to_visit.getVisit().getPlace_id()+"/"+currentP.getArrival().getPlace_id()+"/"+TimeUtils.getMillis(to_visit.getDeparture_time()), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/d/"+to_visit.getVisit().getPlace_id()+"/"+currentP.getArrival().getPlace_id()+"/"+TimeUtils.getMillis(to_visit.getDeparture_time()), Boolean.class);
 								logger.info("Updated (dec) crowding level from "+to_visit.getVisit().getPlace_id()+" to "+currentP.getArrival().getPlace_id()+" at "+to_visit.getDeparture_time());
 							} else {
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/d/"+to_visit.getVisit().getPlace_id()+"/"+currentP.getTo_visit().get(i+1).getVisit().getPlace_id()+"/"+TimeUtils.getMillis(to_visit.getDeparture_time()), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/d/"+to_visit.getVisit().getPlace_id()+"/"+currentP.getTo_visit().get(i+1).getVisit().getPlace_id()+"/"+TimeUtils.getMillis(to_visit.getDeparture_time()), Boolean.class);
 								logger.info("Updated (dec) crowding level from "+to_visit.getVisit().getPlace_id()+" to "+currentP.getTo_visit().get(i+1).getVisit().getPlace_id()+" at "+to_visit.getDeparture_time());
 							}
 							if (j==newP.getTo_visit().size()-1) { //decrease crowding level from last activity to visit to the arrival location
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/i/"+to_visit_new.getVisit().getPlace_id()+"/"+newP.getArrival().getPlace_id()+"/"+TimeUtils.getMillis(to_visit_new.getDeparture_time()), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/i/"+to_visit_new.getVisit().getPlace_id()+"/"+newP.getArrival().getPlace_id()+"/"+TimeUtils.getMillis(to_visit_new.getDeparture_time()), Boolean.class);
 								logger.info("Updated (inc) crowding level from "+to_visit_new.getVisit().getPlace_id()+" to "+newP.getArrival().getPlace_id()+" at "+to_visit_new.getDeparture_time());
 							} else {
-								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/i/"+to_visit_new.getVisit().getPlace_id()+"/"+newP.getTo_visit().get(j+1).getVisit().getPlace_id()+"/"+TimeUtils.getMillis(to_visit_new.getDeparture_time()), Boolean.class);
+								restTemplate.getForObject(CROWDING_MODULE_URL+"crowding/"+city+"/i/"+to_visit_new.getVisit().getPlace_id()+"/"+newP.getTo_visit().get(j+1).getVisit().getPlace_id()+"/"+TimeUtils.getMillis(to_visit_new.getDeparture_time()), Boolean.class);
 								logger.info("Updated (inc) crowding level from "+to_visit_new.getVisit().getPlace_id()+" to "+newP.getTo_visit().get(j+1).getVisit().getPlace_id()+" at "+to_visit_new.getDeparture_time());
 							}
 							if (!different_arr_time) {
@@ -557,18 +479,21 @@ public class RESTController {
 			switch (type) {
 			case 1: // greedy
 				return new VisitPlanAlternatives(
+						city,
 						newP,
 						new FindShortestPath().updatePlan(cityData, new_visited, plans.getShortest(), pois),
 						new FindCrowdRelatedPath().updatePlan(cityData, new_visited, plans.getCrowd_related(), pois, plans.getCrowd_preference()),
 						plans.getCrowd_preference());
 			case 2: // shortest
 				return new VisitPlanAlternatives(
+						city,
 						new FindGreedyPath().updatePlan(cityData, new_visited, plans.getGreedy(), pois),
 						newP,
 						new FindCrowdRelatedPath().updatePlan(cityData, new_visited, plans.getCrowd_related(), pois, plans.getCrowd_preference()),
 						plans.getCrowd_preference());
 			default: //0
 				return new VisitPlanAlternatives(
+						city,
 						new FindGreedyPath().updatePlan(cityData, new_visited, plans.getGreedy(), pois),
 						new FindShortestPath().updatePlan(cityData, new_visited, plans.getShortest(), pois),
 						newP, plans.getCrowd_preference());			
@@ -577,29 +502,29 @@ public class RESTController {
 		}
 
 		return plans;
-
 	}
 
 	@RequestMapping(value = "ov_crowding_fdbk", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody boolean setOverallCrowdingFdbk(@RequestBody OverallFeedback fdbk) {
 		logger.info("Overall Crowding Feedback from "+fdbk.getUser());
 		logger.info("Value "+fdbk.getChoice());
-
-		return cityData.updateUserOv_Cr(fdbk);
+		String city = fdbk.getCity();
+		return cityDataMap.get(city).updateUserOv_Cr(fdbk);
 	}
 
 	@RequestMapping(value = "ov_plan_fdbk", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody boolean setOverallPlanFdbk(@RequestBody OverallFeedback fdbk) {
 		logger.info("Overall Plan Feedback from "+fdbk.getUser());
 		logger.info("Value "+fdbk.getChoice());
-
-		return cityData.updateUserOv_Pl(fdbk);
+		String city = fdbk.getCity();
+		return cityDataMap.get(city).updateUserOv_Pl(fdbk);
 	}
 
 	@RequestMapping(value = "finish", headers="Accept=application/json", method = RequestMethod.POST)
 	public @ResponseBody boolean removePlan(@RequestBody User user) {
-		logger.info("User "+user.getEmail()+" completed his visiting plan");
-		return cityData.deletePlan(user.getEmail());
+		logger.info("User "+user.getEmail()+" completed his visiting plan in "+user.getCity());
+		String city = user.getCity();
+		return cityDataMap.get(city).deletePlan(user.getEmail());
 	}
 
 	public void askUpdate() {
@@ -612,9 +537,4 @@ public class RESTController {
 		}
 
 	}
-	
-	public List<GridCrowding> askCrowdDump() {
-		return cityData.retrieveGridCrowding();
-	}
-
 }

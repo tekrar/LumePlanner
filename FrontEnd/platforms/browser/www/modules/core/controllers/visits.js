@@ -5,8 +5,8 @@
 
 angular
     .module('core')
-    .controller('VisitsController', ['$scope', 'passData', 'selectedPOIs', 'currentView', '$location',
-        function($scope, passData, selectedPOIs, currentView, $location) {
+    .controller('VisitsController', ['$scope', 'city', 'passData', 'selectedPOIs', 'currentView', '$location',
+        function($scope, city, passData, selectedPOIs, currentView, $location) {
 
           $scope.view_name = currentView.get();
 

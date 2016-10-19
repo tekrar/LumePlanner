@@ -1,6 +1,7 @@
 package citylive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.CityProp;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
@@ -8,17 +9,21 @@ import org.geojson.Polygon;
 import util.KMLSquare;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import static citylive.Tables.LonLatBbox;
-import static citylive.Tables.anyFile;
-import static citylive.Tables.base_dir_er;
+
 import static util.GeoJson2KML.printFooterDocument;
 import static util.GeoJson2KML.printHeaderDocument;
 
 
 public class CityArea {
+
+	static final String base_dir_er = "C:\\Users\\marco\\Desktop\\AppVenezia\\Backend\\CrowdingModule\\src\\main\\webapp\\WEB-INF\\data\\emilia-romagna\\";
+	static final String anyFile = base_dir_er + "Emilia_CityLive_TrafficErl_201101310900_201101311000.txt.gz";
 
 	private String name;
 	private double[][] lonLatBbox;
@@ -31,7 +36,7 @@ public class CityArea {
 	private int mini, maxi, minj, maxj;
 	private int nrows, ncols;
 	
-	public CityArea(String name, double[][] lonLatBbox, String anyFile) {
+	public CityArea(String name, double[][] lonLatBbox) {
 		this.name = name;
 		this.lonLatBbox = PointConvert.WGS84toROMA40(lonLatBbox);
 		
@@ -206,7 +211,7 @@ public class CityArea {
 	public static void main(String[] args) throws Exception {
 
 		String city = "modena";
-		CityArea a = new CityArea(city,LonLatBbox.get(city),anyFile);
+		CityArea a = new CityArea(city, CityProp.getInstance().get(city).getLonLatBbox());
 		//a.toKml(base_dir+city".kml");
 		a.toGeoJson(base_dir_er+city+".geojson");
 	}

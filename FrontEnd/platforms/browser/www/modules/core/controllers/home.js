@@ -12,8 +12,8 @@
  */
 angular
     .module('core')
-    .controller('HomeController', ['$scope', '$http', '$location', 'storeConfig', 'storeUser', 'visitPlan', 'passData', 'currentView', 'city' ,'selectedPOIs', 'storeDeparture', 'storeArrival', 'storeTime', 'loadedPOIs', 'storePOIs', 'storeSlider',
-				   function($scope, $http, $location, storeConfig, storeUser, visitPlan, passData, currentView, city, selectedPOIs, storeDeparture, storeArrival, storeTime, loadedPOIs, storePOIs, storeSlider) {
+    .controller('HomeController', ['$scope', '$http', 'city', '$location', 'storeConfig', 'storeUser', 'visitPlan', 'passData', 'currentView' ,'selectedPOIs', 'storeDeparture', 'storeArrival', 'storeTime', 'loadedPOIs', 'storePOIs', 'storeSlider',
+				   function($scope, $http, city, $location, storeConfig, storeUser, visitPlan, passData, currentView, selectedPOIs, storeDeparture, storeArrival, storeTime, loadedPOIs, storePOIs, storeSlider) {
 				       $scope.load = true;
 				       $scope.load_plan = false;
 				       //load config
@@ -28,8 +28,6 @@ angular
 				       } else {
 
 						console.log("-------"+city.get());
-						   $scope.city = city.get();
-
 
 
 						   console.log(loadedPOIs.get()+" != "+city.get()+"  "+(loadedPOIs.get() != city.get()));

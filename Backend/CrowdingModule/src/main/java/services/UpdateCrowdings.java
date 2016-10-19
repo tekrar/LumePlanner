@@ -1,5 +1,6 @@
 package services;
 
+import io.CityData;
 import io.Mongo;
 
 import java.io.IOException;
@@ -20,27 +21,27 @@ public class UpdateCrowdings {
 	
 	public ComputeCellPathAndDistances compute = new ComputeCellPathAndDistances();
 
-	public boolean run(Mongo dao, String inc_dec, String poi_start, String poi_end, Long time_slot, Map<String, Map<String, Map<Integer, Map<String, Double>>>> cell_path_distances, Map<String, HashMap<String, List<UncertainValue>>> travel_times, List<Cell> grid) {
+	public boolean run(CityData cityData, String inc_dec, String poi_start, String poi_end, Long time_slot) {
 
 		try {
 			//cell_path_distances = <position, <cell, distance_walked_in_cell>
 			
-			Long travellingTime = getTravelTime(poi_start, poi_end, time_slot, travel_times); 
+			Long travellingTime = getTravelTime(poi_start, poi_end, time_slot, cityData.travel_times);
 					//dao.retrieveTravelTime(poi_start, poi_end, time_slot);
 			
 			//compute the total distance covered along the path
 			double tot_distance = 0d;
 
-			for (int i=0; i< cell_path_distances.get(poi_start).get(poi_end).size(); i++) {
-				for (String c : cell_path_distances.get(poi_start).get(poi_end).get(i).keySet()) {
-					tot_distance+=cell_path_distances.get(poi_start).get(poi_end).get(i).get(c);
+			for (int i=0; i< cityData.p2p_cell_paths.get(poi_start).get(poi_end).size(); i++) {
+				for (String c : cityData.p2p_cell_paths.get(poi_start).get(poi_end).get(i).keySet()) {
+					tot_distance += cityData.p2p_cell_paths.get(poi_start).get(poi_end).get(i).get(c);
 				}
 			}
 			//compute the distance covered in each cell
 			Map<Integer, Double> distance_rate = new HashMap<>();
-			for (int i=0; i< cell_path_distances.get(poi_start).get(poi_end).size(); i++) {
-				for (String c : cell_path_distances.get(poi_start).get(poi_end).get(i).keySet()) {
-					distance_rate.put(i, cell_path_distances.get(poi_start).get(poi_end).get(i).get(c)/tot_distance);
+			for (int i=0; i< cityData.p2p_cell_paths.get(poi_start).get(poi_end).size(); i++) {
+				for (String c : cityData.p2p_cell_paths.get(poi_start).get(poi_end).get(i).keySet()) {
+					distance_rate.put(i, cityData.p2p_cell_paths.get(poi_start).get(poi_end).get(i).get(c)/tot_distance);
 				}
 			}
 			//compute the travelling time per every cell
@@ -55,14 +56,14 @@ public class UpdateCrowdings {
 			for (int i=0; i< travel_byCell.size(); i++) {
 				dep_time_fromCell += travel_byCell.get(i);
 				Cell current_cell = null;
-				for (Cell cell : grid) {
-					if (cell.getId().equals(cell_path_distances.get(poi_start).get(poi_end).get(i).keySet().iterator().next())) {
+				for (Cell cell : cityData.grid) {
+					if (cell.getId().equals(cityData.p2p_cell_paths.get(poi_start).get(poi_end).get(i).keySet().iterator().next())) {
 						current_cell = cell;
 					}
 				}
 				//current_cell = dao.retrieveCell(cell_path_distances.get(poi_start).get(poi_end).get(i).keySet().iterator().next());
-				
-				dao.updateGridCrowdings(current_cell, arr_time_inCell, dep_time_fromCell, inc_dec);
+
+				cityData.dao.updateGridCrowdings(current_cell, arr_time_inCell, dep_time_fromCell, inc_dec);
 				arr_time_inCell += travel_byCell.get(i);
 				
 			}

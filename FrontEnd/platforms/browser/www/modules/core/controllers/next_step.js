@@ -25,8 +25,10 @@ function calculateAngle(lat1, lng1, lat2, lng2) {
 
 angular
     .module('core')
-    .controller('NextStepController', ['$scope', '$http', 'currentDeparture', 'currentDestination', 'storeConfig', 'passData', 'currentView', '$location', 'leafletData',
-        function($scope, $http, currentDeparture, currentDestination, storeConfig, passData, currentView, $location, leafletData) {
+    .controller('NextStepController', ['$scope', '$http', 'city', 'currentDeparture', 'currentDestination', 'storeConfig', 'passData', 'currentView', '$location', 'leafletData',
+        function($scope, $http, city, currentDeparture, currentDestination, storeConfig, passData, currentView, $location, leafletData) {
+
+
 
           $scope.ready = false;
           $scope.load = true;

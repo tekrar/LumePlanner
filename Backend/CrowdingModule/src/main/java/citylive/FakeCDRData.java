@@ -1,11 +1,10 @@
 package citylive;
 
+import io.CityProp;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-
-import static citylive.Tables.LonLatBbox;
-import static citylive.Tables.anyFile;
 
 /**
  * Created by marco on 13/10/2016.
@@ -19,7 +18,7 @@ public class FakeCDRData {
     public static void run(String city) throws Exception {
 
         String base_dir = "C:\\Users\\marco\\Desktop\\AppVenezia\\Backend\\CrowdingModule\\src\\main\\webapp\\WEB-INF\\data\\"+city+"\\";
-        CityArea a = new CityArea(city, LonLatBbox.get(city),anyFile);
+        CityArea a = new CityArea(city, CityProp.getInstance().get(city).getLonLatBbox());
 
         a.toGeoJson(base_dir+"grid.geojson");
 

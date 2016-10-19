@@ -5,8 +5,8 @@
 
 angular
     .module('core')
-    .controller('VisitsController', ['$scope', 'passData', 'selectedPOIs', 'currentView', '$location',
-        function($scope, passData, selectedPOIs, currentView, $location) {
+    .controller('VisitsController', ['$scope', 'city', 'passData', 'selectedPOIs', 'currentView', '$location',
+        function($scope, city, passData, selectedPOIs, currentView, $location) {
 
           $scope.view_name = currentView.get();
 
@@ -34,8 +34,7 @@ angular
               return false;
             }
             return true;
-          };;;
-
+          };
           $scope.items = passData.get().sort(function(item1, item2) {
             return (item1.display_name > item2.display_name) - (item1.display_name < item2.display_name);
           });

@@ -5,8 +5,10 @@
 
 angular
     .module('core')
-    .controller('VisitController', ['$scope', '$http', 'currentDeparture', 'visitPlan', 'currentDestination', 'storeConfig', 'passData', '$location', 'storeUser', 'currentView',
-        function($scope, $http, currentDeparture, visitPlan, currentDestination, storeConfig, passData, $location, storeUser, currentView) {
+    .controller('VisitController', ['$scope', '$http', 'city', 'currentDeparture', 'visitPlan', 'currentDestination', 'storeConfig', 'passData', '$location', 'storeUser', 'currentView',
+        function($scope, $http, city, currentDeparture, visitPlan, currentDestination, storeConfig, passData, $location, storeUser, currentView) {
+          console.info("----------------"+city.get());
+
           var to_visit = passData.get().activity;
           $scope.rate = 0;
           $scope.rated = false;
@@ -88,7 +90,8 @@ angular
               departure       : currentDeparture.get().activity,
               departure_time  : currentDeparture.get().time,
               arrival         : currentDestination.get().activity,
-              choice          : val
+              choice          : val,
+              city            : city.get()
             };
 
             console.log(request);
@@ -105,10 +108,11 @@ angular
           $scope.next = function () {
             var d = new Date().getTime();
             var request = {
-              user  : storeUser.getUser().email,
+              user    : storeUser.getUser().email,
               visited : currentDestination.get().activity,
-              time  : d,
-              rating : $scope.rate
+              time    : d,
+              rating  : $scope.rate,
+              city    : city.get()
             };
             console.log(request);
             $http.post(storeConfig.get().dita_server+'visited', request).

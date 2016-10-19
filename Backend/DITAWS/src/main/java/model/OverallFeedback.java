@@ -2,16 +2,27 @@ package model;
 
 public class OverallFeedback {
 
+	private String city;
 	private String user;
 	private int choice;
 	private double crowding;
 	
 	public OverallFeedback() {}
 
-	public OverallFeedback(String user, int value, double crowding) {
+	public OverallFeedback(String city, String user, int value, double crowding) {
+		this.city = city;
 		this.setUser(user);
 		this.setChoice(value);
 		this.setCrowding(crowding);
+	}
+
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 	public String getUser() {

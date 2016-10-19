@@ -38,4 +38,8 @@ public class CityProperties {
     public String getTL() {
         return lonLatBL[0]+","+lonLatTR[1];
     }
+
+    public double[][] getLonLatBbox() {
+        return new double[][]{lonLatBL,lonLatTR};
+    }
 }

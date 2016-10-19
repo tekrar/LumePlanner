@@ -5,9 +5,10 @@
 
 angular
     .module('core')
-    .controller('OverviewController', ['$scope', '$http', 'storeConfig', 'visitPlan', 'currentDeparture', 'currentDestination', 'passData', 'storeDeparture', 'storeSlider', 'storeArrival', 'selectedPOIs', '$location', 'storeUser', 'currentView',
-        function($scope, $http, storeConfig, visitPlan, currentDeparture, currentDestination, passData, storeDeparture, storeSlider, storeArrival, selectedPOIs, $location, storeUser, currentView) {
+    .controller('OverviewController', ['$scope', '$http', 'city', 'storeConfig', 'visitPlan', 'currentDeparture', 'currentDestination', 'passData', 'storeDeparture', 'storeSlider', 'storeArrival', 'selectedPOIs', '$location', 'storeUser', 'currentView',
+        function($scope, $http, city, storeConfig, visitPlan, currentDeparture, currentDestination, passData, storeDeparture, storeSlider, storeArrival, selectedPOIs, $location, storeUser, currentView) {
 
+          console.info("overview ---- "+city.get())
 
           $scope.view_name = currentView.get();
 
@@ -24,6 +25,7 @@ angular
             var request = {
               user      : storeUser.getUser().email,
               choice    : val,
+              city      : city.get(),
               crowding  : visitPlan.getCrowding()
             };
 
@@ -51,6 +53,7 @@ angular
             var request = {
               user  : storeUser.getUser().email,
               choice  : val,
+              city: city.get(),
               crowding  : visitPlan.getCrowding()
             };
 
@@ -65,7 +68,13 @@ angular
           };
 
           $scope.restart = function () {
-            var request = storeUser.getUser();
+            var request = {
+              user  : storeUser.getUser().email,
+              email      : storeUser.getUser().email,
+              city      : city.get()
+            };
+
+            console.log(JSON.stringify(request));
             $http.post(storeConfig.get().dita_server+'finish', request).
               success(function(data) {
                 console.log("User plan deleted:"+data);

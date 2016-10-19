@@ -4,11 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class VisitPlanAlternatives {
+
+	private String city;
 	private VisitPlan 	greedy;
 	private VisitPlan 	shortest;
 	private VisitPlan 	crowd_related;
 	private double		crowd_preference; //-1=fullyCrowded; -0.5=mainlyCrowded; +0.5=mainlyUncrowded; +1=fullyUncrowded
-	
+
+
+
 	public VisitPlanAlternatives() {
 	    this.shortest = new VisitPlan();
 	    this.crowd_related = new VisitPlan();
@@ -16,13 +20,22 @@ public class VisitPlanAlternatives {
 	    this.crowd_preference = 1d;
 	}
 	
-	public VisitPlanAlternatives(VisitPlan greedy, VisitPlan shortest, VisitPlan crowd_related, double crowd_preference) {
+	public VisitPlanAlternatives(String city, VisitPlan greedy, VisitPlan shortest, VisitPlan crowd_related, double crowd_preference) {
+		this.city = city;
 		this.setGreedy(greedy);
 		this.setShortest(shortest);
 		this.setCrowd_related(crowd_related);
 		this.setCrowd_preference(crowd_preference);
 	}
 
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
 	public VisitPlan getGreedy() {
 		return greedy;
 	}

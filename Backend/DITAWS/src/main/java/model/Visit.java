@@ -1,20 +1,31 @@
 package model;
 
 public class Visit {
-	
+
+	private String city;
 	private String user;
 	private POI visited;
 	private long time;
 	
 	public Visit() {}
 
-	public Visit(String user, POI visited, long time) {
-		super();
+
+
+	public Visit(String city, String user, POI visited, long time) {
+		this.city = city;
 		this.setUser(user);
 		this.setVisited(visited);
 		this.setTime(time);
+
 	}
 
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
 	public String getUser() {
 		return user;
 	}

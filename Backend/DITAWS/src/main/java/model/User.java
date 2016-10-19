@@ -6,7 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class User {
-	
+
+	private String 			city;
 	private String 			id;
 	private String 			email;
 	private String 			password;
@@ -34,6 +35,16 @@ public class User {
 		this.setLiked_crowding(false);
 		this.setLiked_plan(false);
 	}
+
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
 	public String getId() {
 		return id;
 	}

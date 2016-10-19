@@ -1,5 +1,6 @@
 package services;
 
+import io.CityProp;
 import io.Mongo;
 
 import java.io.FileReader;
@@ -28,7 +29,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class LoadFiles {
 
-	private Properties p;
+
 
 	private String weekend_weekdays = "wd"; //we
 
@@ -65,12 +66,7 @@ public class LoadFiles {
 	private Map<String, List<Double>> normCallsByCellAndTS;
 
 	public LoadFiles() {
-		p = new Properties();
-		try {
-			p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 	}
 
 //	public static void main(String args[]) {
@@ -91,13 +87,13 @@ public class LoadFiles {
 //		//l.callsDistribution();
 //	}
 
-	public Map<String, List<UncertainValue>> load(Mongo dao, String baseDir) {
+	public Map<String, List<UncertainValue>> load(Mongo dao, String city) {
 
-		this.baseDir = baseDir;
+		baseDir = this.getClass().getResource("/../data/"+ CityProp.getInstance().get(city).getDataDir()).getPath();
 
 		roads_lengths = loadGridRoads();
 
-		grid = importGrid(dao);
+		grid = importGrid(dao,city);
 
 		//veniceCaps = loadVeniceCaps();
 
@@ -505,6 +501,8 @@ public class LoadFiles {
 			}
 		}
 
+		logger.info(">>>> "+grid);
+
 		try (CSVReader csvReader = new CSVReader(new FileReader(baseDir+"ts_cell_occupancy_"+weekend_weekdays+"_avg_n.csv"), '\t', '"', 0)) {
 			//line[0] = TS
 			//line[1] = cell
@@ -518,8 +516,9 @@ public class LoadFiles {
 			
 			while (null != (line = csvReader.readNext())) {
 				List<Double> v = result.get(line[1]);
-				if(v == null)
-					logger.warn(line[1]+" is not on the grid");
+				if(v == null) {
+					logger.warn(line[1] + " is not on the grid");
+				}
 				else
 					v.add(TimeUtils.getTimeSlot(Long.parseLong(line[0])*1000l), Double.parseDouble(line[6]));
 			}
@@ -576,7 +575,7 @@ public class LoadFiles {
 	//		return result;
 	//	}
 
-	public List<String> importGrid(Mongo dao) {
+	public List<String> importGrid(Mongo dao, String city) {
 
 		List<Cell> grid = new ArrayList<>();
 		List<String> result = new ArrayList<>();
@@ -586,10 +585,12 @@ public class LoadFiles {
 		double bbox_min_lat = Double.MAX_VALUE;
 		double bbox_max_lat = Double.MIN_VALUE;
 
-		String tl[] = p.getProperty("bbox.tl").split(", ");
-		String tr[] = p.getProperty("bbox.tr").split(", ");
-		String br[] = p.getProperty("bbox.br").split(", ");
-		String bl[] = p.getProperty("bbox.bl").split(", ");
+
+
+		String tl[] = CityProp.getInstance().get(city).getTL().split(",");
+		String tr[] = CityProp.getInstance().get(city).getTR().split(",");
+		String br[] = CityProp.getInstance().get(city).getBR().split(",");
+		String bl[] = CityProp.getInstance().get(city).getBL().split(",");
 
 		Polygon bbox = new Polygon(
 				new LngLatAlt(Double.parseDouble(tl[0]), Double.parseDouble(tl[1])),
@@ -630,11 +631,11 @@ public class LoadFiles {
 					}
 				}
 				if (toImport) {
-					double max_occupancy = max_occupancies.get((String)f.getProperties().get("id"));
+					double max_occupancy = max_occupancies.get(f.getProperties().get("id"));
 					grid.add(new Cell(
 							(String)f.getProperties().get("id"), 
 							(double)f.getProperties().get("area"), 
-							(roads_lengths.containsKey((String)f.getProperties().get("id"))) ? roads_lengths.get((String)f.getProperties().get("id")) : 0d,
+							(roads_lengths.containsKey(f.getProperties().get("id"))) ? roads_lengths.get(f.getProperties().get("id")) : 0d,
 									max_occupancy,
 									(Polygon)f.getGeometry()));
 					result.add((String)f.getProperties().get("id"));
@@ -688,6 +689,6 @@ public class LoadFiles {
 		double temp = Math.pow(10.0, position);
 		a *= temp;
 		a = Math.round(a);
-		return (a / (double)temp);
+		return (a / temp);
 	}
 }

@@ -2,6 +2,7 @@ package model;
 
 public class CrowdingFeedback {
 
+	private String city;
 	private String user;
 	private POI departure;
 	private POI arrival;
@@ -10,12 +11,22 @@ public class CrowdingFeedback {
 	
 	public CrowdingFeedback() {}
 
-	public CrowdingFeedback(String user, POI departure, POI arrival, String departure_time, int value) {
+	public CrowdingFeedback(String city, String user, POI departure, POI arrival, String departure_time, int value) {
+		this.city = city;
 		this.setUser(user);
 		this.setDeparture(departure);
 		this.setArrival(arrival);
 		this.setDeparture_time(departure_time);
 		this.setChoice(value);
+	}
+
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 	public String getUser() {

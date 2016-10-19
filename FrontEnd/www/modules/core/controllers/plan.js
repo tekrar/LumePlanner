@@ -5,8 +5,10 @@
 
 angular
     .module('core')
-    .controller('PlanController', ['$scope', '$http', 'storeConfig', 'passData', 'visitPlan', 'selectedPOIs', 'currentView', '$location', 'storeDeparture', 'storeArrival', 'storeUser',
-				   function($scope, $http, storeConfig, passData, visitPlan, selectedPOIs, currentView, $location, storeDeparture, storeArrival, storeUser) {
+    .controller('PlanController', ['$scope', '$http', 'city', 'storeConfig', 'passData', 'visitPlan', 'selectedPOIs', 'currentView', '$location', 'storeDeparture', 'storeArrival', 'storeUser',
+				   function($scope, $http, city, storeConfig, passData, visitPlan, selectedPOIs, currentView, $location, storeDeparture, storeArrival, storeUser) {
+
+					   console.info("+++++"+city.get());
 
 				       $scope.newSequence = false;
 				       $scope.ready = false;

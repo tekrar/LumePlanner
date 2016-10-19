@@ -42,7 +42,7 @@ angular
     angular.module(ApplicationConfiguration.applicationModuleName).factory('storeUser', function() {
       var user = null;
       var token = null;
-
+      var city = null;
       return {
         setUser: function(item) {
           user = item;
@@ -50,11 +50,17 @@ angular
         setToken: function(item) {
           token = item;
         },
+        setCity: function(item) {
+          city = item;
+        },
         getUser: function() {
           return user;
         },
         getToken: function() {
           return token;
+        },
+        getCity: function() {
+          return city;
         }
       }
     });
@@ -289,10 +295,17 @@ angular
     });
 
     angular.module(ApplicationConfiguration.applicationModuleName).factory('passData', function() {
-
+      var city;
       var savedData = [];
 
       return {
+
+        setCity: function(data) {
+          city = data;
+        },
+        getCity: function() {
+          return city;
+        },
         set: function(data) {
           savedData = data;
         },

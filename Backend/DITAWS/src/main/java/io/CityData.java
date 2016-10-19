@@ -17,7 +17,7 @@ import java.util.*;
  * Created by marco on 18/10/2016.
  */
 public class CityData {
-    private String city;
+    public String city;
     public List<POI> activities;
     private List<POI> restaurants;
     private String last_crowding_levels;
@@ -134,6 +134,9 @@ public class CityData {
     public VisitPlanAlternatives updatePlan(Visit v) {
         return dao.updatePlan(v);
 
+    }
+    public List<POI> retrieveActivities() {
+        return dao.retrieveActivities();
     }
 
     public boolean updateUserOv_Cr(OverallFeedback fdbk) {
