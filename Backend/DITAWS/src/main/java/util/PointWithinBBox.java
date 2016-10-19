@@ -3,19 +3,15 @@ package util;
 import java.io.IOException;
 import java.util.Properties;
 
+import io.CityProp;
 import org.geojson.LngLatAlt;
 
 public class PointWithinBBox {
 	
-	private Properties p;
+	private String city;
 	
-	public PointWithinBBox() {
-		p = new Properties();
-		try {
-			p.load(this.getClass().getClassLoader().getResourceAsStream("DITA.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public PointWithinBBox(String city) {
+		this.city = city;
 	}
 	
 	public boolean check(LngLatAlt coords) {
@@ -23,10 +19,10 @@ public class PointWithinBBox {
 		double lat = coords.getLatitude();
 		double lon = coords.getLongitude();
 
-		String tl[] = p.getProperty("bbox.tl").split(", ");
-		String tr[] = p.getProperty("bbox.tr").split(", ");
-		String br[] = p.getProperty("bbox.br").split(", ");
-		String bl[] = p.getProperty("bbox.bl").split(", ");
+		String tl[] = CityProp.getInstance().get(city).getTL().split(", ");
+		String tr[] = CityProp.getInstance().get(city).getTR().split(", ");
+		String br[] = CityProp.getInstance().get(city).getBR().split(", ");
+		String bl[] = CityProp.getInstance().get(city).getBL().split(", ");
 		
 		double bbox_min_lng = (Double.parseDouble(tl[0]) < Double.parseDouble(bl[0])) ? Double.parseDouble(tl[0]) : Double.parseDouble(bl[0]);
 		double bbox_max_lng = (Double.parseDouble(tr[0]) > Double.parseDouble(br[0])) ? Double.parseDouble(tr[0]) : Double.parseDouble(br[0]);

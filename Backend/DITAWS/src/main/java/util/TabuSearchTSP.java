@@ -1,6 +1,7 @@
 package util;
 
 
+import io.CityData;
 import io.Mongo;
 
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class TabuSearchTSP {
 //		tsp.run(startPlace, endPlace, POIsIDlist, 15);
 //	}
 
-	public Map<String[], Double> run(Mongo dao, POI startPlace, POI endPlace, List<String> POIsIDlist, int numBestSolutions, TreeMap<String, TreeMap<String, Double>> distances_full_map) throws IOException {
+	public Map<String[], Double> run(CityData cityData, POI startPlace, POI endPlace, List<String> POIsIDlist, int numBestSolutions) throws IOException {
 
 
 		Map<Integer,Map<Double, int[]>> topSolutions = new HashMap<Integer,Map<Double, int[]>>(); //<iteration, <cost, index[]>>
@@ -65,7 +66,7 @@ public class TabuSearchTSP {
 		
 
 		//retrieve distance map
-		TreeMap<String, TreeMap<String, Double>> distancesMap = getDistances(dao, startPlace, endPlace, POIsIDlist, distances_full_map);
+		TreeMap<String, TreeMap<String, Double>> distancesMap = getDistances(cityData, startPlace, endPlace, POIsIDlist);
 							//dao.retrieveDistances(startPlace, endPlace, POIsID)
 		
 		Map<String, Integer> mapPlaceIndex = new HashMap<String, Integer>();
@@ -273,22 +274,22 @@ public class TabuSearchTSP {
 		return topSolutionsPlace;
 	}
 
-	private TreeMap<String, TreeMap<String, Double>> getDistances(Mongo dao, POI startPlace, POI endPlace, List<String> POIsIDlist, TreeMap<String, TreeMap<String, Double>> distances_full_map) {
+	private TreeMap<String, TreeMap<String, Double>> getDistances(CityData cityData, POI startPlace, POI endPlace, List<String> POIsIDlist) {
 		TreeMap<String, TreeMap<String, Double>> distancesMap = new TreeMap<>();
 		POI closest_to_end = null;
 		if (endPlace.getPlace_id().equals("00")) {
-			closest_to_end = dao.retrieveClosestActivity(endPlace);
+			closest_to_end = cityData.retrieveClosestActivity(endPlace);
 			POIsIDlist.add(closest_to_end.getPlace_id());
 		}
 		
-		for (String from : distances_full_map.keySet()) {
+		for (String from : cityData.distances.keySet()) {
 			if (POIsIDlist.contains(from)) {
 				TreeMap<String, Double> tos= new TreeMap<String, Double>();
-				for (String to : distances_full_map.get(from).keySet()) {
+				for (String to : cityData.distances.get(from).keySet()) {
 					if (null != closest_to_end && closest_to_end.getPlace_id().equals(to)) {
-						tos.put("00", distances_full_map.get(from).get(to));
+						tos.put("00", cityData.distances.get(from).get(to));
 					} else {
-						tos.put(to, distances_full_map.get(from).get(to));
+						tos.put(to, cityData.distances.get(from).get(to));
 					}
 				}
 				if (null != closest_to_end && closest_to_end.getPlace_id().equals(from)) {
@@ -300,7 +301,7 @@ public class TabuSearchTSP {
 		}
 		
 		if (startPlace.getPlace_id().equals("0")) {
-			Distance d = new ComputeDistances().runOnetoMany(dao, startPlace, endPlace, POIsIDlist);
+			Distance d = new ComputeDistances().runOnetoMany(cityData, startPlace, endPlace, POIsIDlist);
 			TreeMap<String, Double> tos = new TreeMap<String, Double>();
 			for (DistanceTo current : d.getDistances()) {
 				tos.put(current.getTo(), current.getDistance());
@@ -392,6 +393,6 @@ public class TabuSearchTSP {
 		double temp = Math.pow(10.0, position);
 		a *= temp;
 		a = Math.round(a);
-		return (a / (double)temp);
+		return (a / temp);
 	}
 }

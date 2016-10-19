@@ -2342,7 +2342,7 @@ angular.module("leaflet-directive").factory('leafletPathsHelpers', function ($ro
             setPath: function(path, data) {
                 path.setLatLngs(_convertToLeafletLatLngs(data.latlngs));
                 _updatePathOptions(path, data);
-                return;
+
             }
         },
         multiPolyline: {
@@ -2367,7 +2367,7 @@ angular.module("leaflet-directive").factory('leafletPathsHelpers', function ($ro
             setPath: function(path, data) {
                 path.setLatLngs(_convertToLeafletMultiLatLngs(data.latlngs));
                 _updatePathOptions(path, data);
-                return;
+
             }
         } ,
         polygon: {
@@ -2381,7 +2381,7 @@ angular.module("leaflet-directive").factory('leafletPathsHelpers', function ($ro
             setPath: function(path, data) {
                 path.setLatLngs(_convertToLeafletLatLngs(data.latlngs));
                 _updatePathOptions(path, data);
-                return;
+
             }
         },
         multiPolygon: {
@@ -2407,7 +2407,7 @@ angular.module("leaflet-directive").factory('leafletPathsHelpers', function ($ro
             setPath: function(path, data) {
                 path.setLatLngs(_convertToLeafletMultiLatLngs(data.latlngs));
                 _updatePathOptions(path, data);
-                return;
+
             }
         },
         rectangle: {

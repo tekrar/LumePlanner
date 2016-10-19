@@ -28,10 +28,8 @@ angular
 					   }
 					   
 					   return name_array[0]+"<br />"+name_array[1]+","+name_array[2];
-				       };
-
-				       
-				       function drawMap(items) {
+					   }
+					   function drawMap(items) {
 					   console.log('path:', items.path);
 					   $scope.geojson = {
 					       data  : items.path.points,

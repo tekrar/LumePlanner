@@ -1,5 +1,6 @@
 package util;
 
+import io.CityProp;
 import io.Mongo;
 
 import java.io.IOException;
@@ -20,16 +21,11 @@ import static util.Misc.haverDist;
 
 public class TravelTime {
 
-	private Properties p;
+	private String  city;
 
 
-	public TravelTime() {
-		p = new Properties();
-		try {
-			p.load(this.getClass().getClassLoader().getResourceAsStream("DITA.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public TravelTime(String city) {
+		this.city = city;
 	}
 
 //	private Logger logger = Logger.getLogger(TravelTime.class);
@@ -55,7 +51,7 @@ public class TravelTime {
 //		System.out.println(hopper.route(request).getPoints().toString());
 //	}
 
-	public Map<String, HashMap<String, List<UncertainValue>>> initTravelTimeFromPOIs(Mongo dao, List<POI> POIs, String dataPath) {
+	public Map<String, HashMap<String, List<UncertainValue>>> initTravelTimeFromPOIs(Mongo dao, List<POI> POIs) {
 		Map<String, HashMap<String, List<UncertainValue>>> result = new HashMap<String, HashMap<String, List<UncertainValue>>>();
 
 //		GraphHopper hopper = new GraphHopper().forServer();
@@ -127,8 +123,11 @@ public class TravelTime {
 
 		GraphHopper hopper = new GraphHopper().forServer();
 		hopper.setInMemory();
-		hopper.setOSMFile("src/main/webapp/WEB-INF/data/"+p.getProperty("data.dir")+"bbox.osm");
-		hopper.setGraphHopperLocation("data/"+p.getProperty("data.dir")+"graph");
+
+
+
+		hopper.setOSMFile("src/main/webapp/WEB-INF/data/"+CityProp.getInstance().get(city).getDataDir()+"bbox.osm");
+		hopper.setGraphHopperLocation("data/"+CityProp.getInstance().get(city).getDataDir()+"graph");
 		hopper.setEncodingManager(new EncodingManager(EncodingManager.FOOT));
 		hopper.importOrLoad();
 
@@ -180,6 +179,6 @@ public class TravelTime {
 		double temp = Math.pow(10.0, position);
 		a *= temp;
 		a = Math.round(a);
-		return (a / (double)temp);
+		return (a / temp);
 	}
 }

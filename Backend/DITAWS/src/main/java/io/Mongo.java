@@ -57,7 +57,9 @@ import com.mongodb.client.result.DeleteResult;
 
 public class Mongo {
 
-	private Properties p;
+    private static final String MONGO_URL = "127.0.0.1:27017";
+	private static final String MONGO_USER = "dita";
+    private static final String MONGO_PASSWORD = "mames1976";
 
 	private Logger logger = Logger.getLogger(Mongo.class);
 
@@ -71,39 +73,29 @@ public class Mongo {
 
 	private String nameDB;
 
-	public Mongo (String nameDB, String userDB, String pwdDB) {
+	public Mongo (String nameDB) {
 
 		this.nameDB = nameDB;
 
-		CodecRegistry codecRegistry = 
+		CodecRegistry codecRegistry =
 				CodecRegistries.fromRegistries(
 						CodecRegistries.fromCodecs(new PointCodec(), new UncertainValueCodec()),
-						MongoClient.getDefaultCodecRegistry());  
+						MongoClient.getDefaultCodecRegistry());
 
-		p = new Properties();
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		mongoLogger = java.util.logging.Logger.getLogger( "org.mongodb.driver" );
-		mongoLogger.setLevel(Level.SEVERE); 
-
-		try {
-
-			p.load(this.getClass().getClassLoader().getResourceAsStream("DITA.properties"));
-			mongoClient = new MongoClient(new ServerAddress(p.getProperty("mongo.url")),
-					Arrays.asList(
+		mongoLogger.setLevel(Level.SEVERE);
+        mongoClient = new MongoClient(new ServerAddress(MONGO_URL), Arrays.asList(
 							MongoCredential.createCredential(
-									userDB,
+                                    MONGO_USER,
 									nameDB,
-									pwdDB.toCharArray())),
+                                    MONGO_PASSWORD.toCharArray())),
 									MongoClientOptions.builder().codecRegistry(codecRegistry).build());
-			db = mongoClient.getDatabase(nameDB);
-			logger.info("loading new db "+nameDB+" .....");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+        db = mongoClient.getDatabase(nameDB);
+        logger.info("loading new db "+nameDB+" .....");
 	}
 
 
@@ -294,7 +286,7 @@ public class Mongo {
 		return result;
 	}
 
-
+    /*
 	public TreeMap<String, TreeMap<String, Double>> retrieveDistances(POI startPlace, POI endPlace, List<String> POIsID) throws IOException {
 		POI closest_to_end = null;
 		if (endPlace.getPlace_id().equals("00")) {
@@ -342,7 +334,7 @@ public class Mongo {
 		}
 		return result;
 	}
-
+    */
 
 	public String retrieveCrowdingLevels(Map<String, HashMap<String, List<UncertainValue>>> crowding_levels, String last_crowding_levels) {
 		int update_size=0;

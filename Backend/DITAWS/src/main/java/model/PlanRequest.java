@@ -5,6 +5,7 @@ import java.util.List;
 public class PlanRequest {
 	
 	private String			user;
+	private String 			city;
 	private double			crowd_preference;
 	private POI 			start_place;
 	private POI 			end_place;
@@ -13,9 +14,10 @@ public class PlanRequest {
 	
 	public PlanRequest(){}
 
-	public PlanRequest(String user, double crowd_preference, POI start_place,
+	public PlanRequest(String user, String city, double crowd_preference, POI start_place,
 			POI end_place, String start_time, List<String> visits) {
 		this.user = user;
+		this.city = city;
 		this.crowd_preference = crowd_preference;
 		this.start_place = start_place;
 		this.end_place = end_place;
@@ -23,7 +25,13 @@ public class PlanRequest {
 		this.visits = visits;
 	}
 
+	public String getCity() {
+		return city;
+	}
 
+	public void setCity(String city) {
+		this.city = city;
+	}
 
 	public String getUser() {
 		return user;

@@ -41,7 +41,7 @@ angular
 
     angular.module(ApplicationConfiguration.applicationModuleName).factory('storeUser', function() {
       var user = null;
-      var token = null
+      var token = null;
 
       return {
         setUser: function(item) {
@@ -68,8 +68,8 @@ angular
         arrival         : {},
         departure_time  : "",
         arrival_time    : "",
-        to_visit        : new Array(),
-        visited         : new Array(),
+        to_visit        : [],
+        visited         : [],
         crowding        : 0.0,
         hash            : 0
       };

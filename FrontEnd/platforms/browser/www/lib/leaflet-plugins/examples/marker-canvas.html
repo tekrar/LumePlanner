@@ -29,7 +29,7 @@ circle.draw = function(ctx, w, h) {
 	ctx.lineTo(w/5, -h/5);
 	ctx.stroke();
 	ctx.closePath();
-}
+};
 
 map.addLayer(new L.Marker(map.getCenter(), {icon: circle, draggable: true, opacity: 0.7}));
 

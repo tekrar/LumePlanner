@@ -1,5 +1,6 @@
 package services;
 
+import io.CityData;
 import io.Mongo;
 
 import java.util.ArrayList;
@@ -42,13 +43,13 @@ public class ComputeDistances {
 		dao.insertDistances(distances);
 	}
 
-	public Distance runOnetoMany(Mongo dao, POI from, POI to_global, List<String> POIsCollection) {
+	public Distance runOnetoMany(CityData cityData, POI from, POI to_global, List<String> POIsCollection) {
 		Collections.sort(POIsCollection);
 		List<DistanceTo> dTos = new ArrayList<DistanceTo>();
 		for (String next_id : POIsCollection) {
 			if (!next_id.equals(from.getPlace_id())) {
 				if (!next_id.equals("00")) {
-					POI to = dao.retrieveActivity(next_id);
+					POI to = cityData.retrieveActivity(next_id);
 					dTos.add(new DistanceTo(to.getPlace_id(), haverDist(
 							new double[]{from.getGeometry().getCoordinates().getLatitude(), from.getGeometry().getCoordinates().getLongitude()}, 
 							new double[]{to.getGeometry().getCoordinates().getLatitude(), to.getGeometry().getCoordinates().getLongitude()})));

@@ -32,11 +32,11 @@ angular
 
 
 
-						   console.log(loadedPOIs.get()+" != "+city.get()+"  "+(loadedPOIs.get() != city.get()))
+						   console.log(loadedPOIs.get()+" != "+city.get()+"  "+(loadedPOIs.get() != city.get()));
 
 					   //get list of POIs -------------------------------------------------------------------
 					   if (loadedPOIs.get() != city.get()) {
-					       $http.get(storeConfig.get().dita_server+'activities').
+					       $http.get(storeConfig.get().dita_server+'activities?city='+city.get()).
 						   success(function(data) {
 							   storePOIs.clear();
 						       //save data into vars
@@ -252,6 +252,7 @@ angular
 					       console.log(slid_val);
 					       var request = {
 						   user : storeUser.getUser().email,
+                           city: city.get(),
 						   crowd_preference : slid_val,
 					       	   start_time : storeTime.get(),
 						   visits : selectedPOIs.get()

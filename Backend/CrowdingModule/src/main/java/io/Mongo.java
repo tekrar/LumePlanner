@@ -46,8 +46,10 @@ import com.mongodb.client.MongoDatabase;
 
 
 public class Mongo {
+	private static final String MONGO_URL = "127.0.0.1:27017";
+	private static final String MONGO_USER = "dita";
+	private static final String MONGO_PASSWORD = "mames1976";
 
-	private Properties p;
 
 	private Logger logger = Logger.getLogger(Mongo.class);
 
@@ -59,14 +61,14 @@ public class Mongo {
 
 	private java.util.logging.Logger mongoLogger;
 
-	public Mongo (String nameDB, String userDB, String pwdDB) {
+	public Mongo (String nameDB) {
 
 		CodecRegistry codecRegistry = 
 				CodecRegistries.fromRegistries(
 						CodecRegistries.fromCodecs(new PointCodec(), new UncertainValueCodec()),
 						MongoClient.getDefaultCodecRegistry());  
 
-		p = new Properties();
+
 
 		mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -74,19 +76,15 @@ public class Mongo {
 		mongoLogger = java.util.logging.Logger.getLogger( "org.mongodb.driver" );
 		mongoLogger.setLevel(Level.SEVERE); 
 
-		try {
-			p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
-			mongoClient = new MongoClient(new ServerAddress(p.getProperty("mongo.url")),
+		mongoClient = new MongoClient(new ServerAddress(MONGO_URL),
 					Arrays.asList(
 							MongoCredential.createCredential(
-									userDB,//p.getProperty("mongo.user"),
+									MONGO_USER,//p.getProperty("mongo.user"),
 									nameDB,//p.getProperty("mongo.db"),
-									pwdDB.toCharArray())),//p.getProperty("mongo.password").toCharArray())),
+									MONGO_PASSWORD.toCharArray())),//p.getProperty("mongo.password").toCharArray())),
 									MongoClientOptions.builder().codecRegistry(codecRegistry).build());
-			db = mongoClient.getDatabase(nameDB);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		db = mongoClient.getDatabase(nameDB);
+
 	}
 
 	//	public void closeMongoConnection(){
@@ -324,18 +322,12 @@ public class Mongo {
 	}
 
 	public boolean checkCrowdingLevels(){
-		if (db.getCollection("crowdings").count() == 0l) {
-			return false;
-		}
-		return true;
-	}
+        return db.getCollection("crowdings").count() != 0l;
+    }
 
 	public boolean checkCellPaths(){
-		if (db.getCollection("cellpaths").count() == 0l) {
-			return false;
-		}
-		return true;
-	}
+        return db.getCollection("cellpaths").count() != 0l;
+    }
 
 	public Map<String, HashMap<String, List<UncertainValue>>> retrieveCrowdingLevels() {
 		Map<String, HashMap<String, List<UncertainValue>>> result = new HashMap<>();
@@ -644,7 +636,7 @@ public class Mongo {
 		double temp = Math.pow(10.0, position);
 		a *= temp;
 		a = Math.round(a);
-		return (a / (double)temp);
+		return (a / temp);
 	}
 
 	public double findMaxGridCrowding() {

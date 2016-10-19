@@ -1,5 +1,6 @@
 package services;
 
+import io.CityData;
 import io.Mongo;
 
 import java.util.ArrayList;
@@ -31,10 +32,7 @@ public class FindGreedyPath {
 
 	private List<String> to_visit;
 
-	public VisitPlan newPlan(Mongo dao, String user, POI departure, POI arrival, String start_time, 
-			List<String> POIsList, List<POI> full_pois, TreeMap<String, TreeMap<String, Double>> distances, Map<String, HashMap<String, List<UncertainValue>>> travel_times, 
-			Map<String, HashMap<String, List<UncertainValue>>> crowding_levels, 
-			Map<String, List<Integer>> occupancies, GraphHopper hopper) {
+	public VisitPlan newPlan(CityData cityData, String user, POI departure, POI arrival, String start_time, List<String> POIsList) {
 		to_visit = new ArrayList<String>();
 		for (String poi : POIsList) {
 			to_visit.add(poi);
@@ -60,7 +58,7 @@ public class FindGreedyPath {
 			for (String poi : to_visit) {
 				//POI current = dao.retrieveActivity(poi);
 				POI current = null;
-				for (POI p : full_pois) {
+				for (POI p : cityData.activities) {
 					if (poi.equals(p.getPlace_id())) {
 						current = p;
 						break;
@@ -103,7 +101,7 @@ public class FindGreedyPath {
 		List<Node> path = new ArrayList<Node>();
 		List<Activity> activities = new ArrayList<Activity>();
 		try {
-			path = new PathFindingWithCrowding().AstarSearch(dao, departure, arrival, start_time, distances, graph, travel_times, crowding_levels, occupancies, 1d);
+			path = new PathFindingWithCrowding().AstarSearch(cityData, departure, arrival, start_time, graph, 1d);
 			logger.info("Greedy path with real cong.levels :"+path.get(0).getName()+"-"+path.get(path.size()-1).getName()+":"+path.get(path.size()-1).getF_scores());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -122,7 +120,7 @@ public class FindGreedyPath {
 				p = (n.getName().equals("0")) ? departure : arrival;
 			} else {
 				//p = dao.retrieveActivity(n.getName());
-				for (POI poi : full_pois) {
+				for (POI poi : cityData.activities) {
 					if (poi.getPlace_id().equals(n.getName())) {
 						p = poi;
 						break;
@@ -136,7 +134,7 @@ public class FindGreedyPath {
 				to = p;
 			}
 			if (to != null) {
-				Path subpath = new TravelPath().compute(hopper, from, to);
+				Path subpath = new TravelPath().compute(cityData.hopper, from, to);
 				path_points.addPoints(subpath.getPoints());
 				path_points.incrementLength(subpath.getLength());
 			}
@@ -154,10 +152,7 @@ public class FindGreedyPath {
 	}
 
 
-	public VisitPlan updatePlan(Mongo dao, Visit last_visit, VisitPlan plan, List<String> POIsList, 
-			List<POI> all_pois, TreeMap<String, TreeMap<String, Double>> distances, Map<String, HashMap<String, List<UncertainValue>>> travel_times, 
-			Map<String, HashMap<String, List<UncertainValue>>> crowding_levels, 
-			Map<String, List<Integer>> occupancies, GraphHopper hopper) {
+	public VisitPlan updatePlan(CityData cityData, Visit last_visit, VisitPlan plan, List<String> POIsList) {
 		to_visit = new ArrayList<String>();
 		for (String poi : POIsList) {
 			to_visit.add(poi);
@@ -181,7 +176,7 @@ public class FindGreedyPath {
 			POI closest = null;
 			for (String poi : to_visit) {
 				POI current = null; // = dao.retrieveActivity(poi);
-				for (POI thispoi : all_pois) {
+				for (POI thispoi : cityData.activities) {
 					if (poi.equals(thispoi.getPlace_id())) {
 						current = thispoi;
 						break;
@@ -218,7 +213,7 @@ public class FindGreedyPath {
 		List<Node> path = new ArrayList<Node>();
 		List<Activity> activities = new ArrayList<Activity>();
 		try {
-			path = new PathFindingWithCrowding().AstarSearch(dao, last_visit.getVisited(), plan.getArrival(), TimeUtils.getStringTime(last_visit.getTime()%86400000L), distances, graph, travel_times, crowding_levels, occupancies, 1d);
+			path = new PathFindingWithCrowding().AstarSearch(cityData, last_visit.getVisited(), plan.getArrival(), TimeUtils.getStringTime(last_visit.getTime()%86400000L), graph, 1d);
 			logger.info("Greedy path with real cong.levels :"+path.get(0).getName()+"-"+path.get(path.size()-1).getName()+":"+path.get(path.size()-1).getF_scores());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -237,7 +232,7 @@ public class FindGreedyPath {
 				p = (n.getName().equals("0")) ? last_visit.getVisited() : plan.getArrival();
 			} else {
 				//p = dao.retrieveActivity(n.getName());
-				for (POI thispoi : all_pois) {
+				for (POI thispoi : cityData.activities) {
 					if (n.getName().equals(thispoi.getPlace_id())) {
 						p = thispoi;
 						break;
@@ -251,7 +246,7 @@ public class FindGreedyPath {
 				to = p;
 			}
 			if (to != null) {
-				Path subpath = new TravelPath().compute(hopper, from, to);
+				Path subpath = new TravelPath().compute(cityData.hopper, from, to);
 				path_points.addPoints(subpath.getPoints());
 				path_points.incrementLength(subpath.getLength());
 			}

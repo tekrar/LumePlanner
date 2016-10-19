@@ -1,5 +1,6 @@
 package services;
 
+import io.CityData;
 import io.Mongo;
 
 import java.io.IOException;
@@ -109,24 +110,24 @@ public class PathFindingWithCrowding {
 	}
 
 	public List<Node> AstarSearch(
-			Mongo dao,
+			CityData cityData,
 			POI start_place,
 			POI end_place,
 			String start_time,
 			List<String> POIsIDlist,
-			TreeMap<String, TreeMap<String, Double>> distances, Map<String, HashMap<String, List<UncertainValue>>> times,
-			Map<String, HashMap<String, List<UncertainValue>>> congestions,
-			Map<String, List<Integer>> occupancies,
+			//TreeMap<String, TreeMap<String, Double>> distances, Map<String, HashMap<String, List<UncertainValue>>> times,
+			//Map<String, HashMap<String, List<UncertainValue>>> congestions,
+			//Map<String, List<Integer>> occupancies,
 			int num_TSP_solutions,
 			double crowd_preference) throws IOException {
 		//logger.info("POIsList:"+POIsIDlist.toString());
 		Map<String, Map<Integer, Node>> graph = Graph.buildGraph(
 				start_place.getPlace_id(),
 				end_place.getPlace_id(),
-				Graph.getSuccessorsList(new TabuSearchTSP().run(dao, start_place, end_place, POIsIDlist, num_TSP_solutions, distances)));
+				Graph.getSuccessorsList(new TabuSearchTSP().run(cityData, start_place, end_place, POIsIDlist, num_TSP_solutions)));
 		
-		final double MAX_CONGESTION = dao.retrieveGridMaxCrowding();
-		final double MAX_OCCUPANCY = findMaxOccupancy(occupancies);
+		final double MAX_CONGESTION = cityData.retrieveGridMaxCrowding();
+		final double MAX_OCCUPANCY = cityData.findMaxOccupancy();
 		/*
         A* Algorithm pseudocode
 		1  Create a node containing the goal state node_goal  
@@ -155,7 +156,7 @@ public class PathFindingWithCrowding {
 		Node source = findStartNode(graph, start_place.getPlace_id());
 		String source_name;
 		if (source.getName().equals("0")) {
-			source_name = dao.retrieveClosestActivity(start_place).getPlace_id();
+			source_name = cityData.retrieveClosestActivity(start_place).getPlace_id();
 		} else {
 			source_name = source.getName();
 		}
@@ -192,16 +193,16 @@ public class PathFindingWithCrowding {
 				String current_name;
 				String child_name;
 				if (current.getName().equals("0")) {
-					current_name = dao.retrieveClosestActivity(start_place).getPlace_id();
+					current_name = cityData.retrieveClosestActivity(start_place).getPlace_id();
 				} else if (current.getName().equals("00")) {
-					current_name = dao.retrieveClosestActivity(end_place).getPlace_id();
+					current_name = cityData.retrieveClosestActivity(end_place).getPlace_id();
 				} else {
 					current_name = current.getName();
 				}
 				if (child.getName().equals("0")) {
-					child_name = dao.retrieveClosestActivity(start_place).getPlace_id();
+					child_name = cityData.retrieveClosestActivity(start_place).getPlace_id();
 				} else if (child.getName().equals("00")) {
-					child_name = dao.retrieveClosestActivity(end_place).getPlace_id();
+					child_name = cityData.retrieveClosestActivity(end_place).getPlace_id();
 				} else {
 					child_name = child.getName();
 				}
@@ -209,7 +210,7 @@ public class PathFindingWithCrowding {
 				//the crowding matrix is triangular, so I look for couples in reverse order if the original order doesn't provide a correspondence
 				String cong_k1;
 				String cong_k2;
-				if (congestions.containsKey(current_name) && congestions.get(current_name).containsKey(child_name)) {
+				if (cityData.crowding_levels.containsKey(current_name) && cityData.crowding_levels.get(current_name).containsKey(child_name)) {
 					cong_k1 = current_name;
 					cong_k2 = child_name;
 				} else {
@@ -217,9 +218,9 @@ public class PathFindingWithCrowding {
 					cong_k1 = child_name;
 				}
 				
-				double time = round(RandomValue.get(times.get(current_name).get(child_name).get(TimeUtils.getTimeSlot(current.getDepartureTime()))), 5);
-				double distance = distances.get(current_name).get(child_name);
-				double congestion = RandomValue.get(congestions.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(current.getDepartureTime())));
+				double time = round(RandomValue.get(cityData.travel_times.get(current_name).get(child_name).get(TimeUtils.getTimeSlot(current.getDepartureTime()))), 5);
+				double distance = cityData.distances.get(current_name).get(child_name);
+				double congestion = RandomValue.get(cityData.crowding_levels.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(current.getDepartureTime())));
 				
 				double actual_speed = (distance/time) * (1d - Math.pow(Math.E, (-GAMMA*(1d/(congestion/MAX_CONGESTION)-1d))));
 				  
@@ -232,9 +233,9 @@ public class PathFindingWithCrowding {
 				double temp_arr_time_actual = ((current.getDepartureTime() + travel_cost_actual) >= 1440) ? ((current.getDepartureTime() + travel_cost_actual) - 1440) : (current.getDepartureTime() + travel_cost_actual);
 				double temp_arr_time_pref = ((current.getDepartureTime() + travel_cost_pref) >= 1440) ? ((current.getDepartureTime() + travel_cost_pref) - 1440) : (current.getDepartureTime() + travel_cost_pref);
 
-				double visit_time = RandomValue.get(times.get(child_name).get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual)));
+				double visit_time = RandomValue.get(cityData.travel_times.get(child_name).get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual)));
 				double visit_distance = visit_time * MAX_SPEED;
-				int occupancy = occupancies.get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual));
+				int occupancy = cityData.occupancies.get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual));
 				
 				double actual_visit_speed = MAX_SPEED * (1d - Math.pow(Math.E, (-GAMMA*(1d/(occupancy/MAX_OCCUPANCY)-1d))));
 				
@@ -254,7 +255,7 @@ public class PathFindingWithCrowding {
 				double temp_dep_time_actual = temp_arr_time_actual + visit_cost_actual;
 				double temp_dep_time_pref = temp_arr_time_pref + visit_cost_pref;
 
-				double time_h_cost = round(RandomValue.get(times.get(source_name).get(child_name).get(TimeUtils.getTimeSlot(source.getDepartureTime()))), 5);
+				double time_h_cost = round(RandomValue.get(cityData.travel_times.get(source_name).get(child_name).get(TimeUtils.getTimeSlot(source.getDepartureTime()))), 5);
 
 				double temp_f_scores = temp_dep_time_pref + time_h_cost;
 
@@ -293,39 +294,19 @@ public class PathFindingWithCrowding {
 	}
 
 
-	private int findMaxOccupancy(Map<String, List<Integer>> occupancies) {
-		int result = Integer.MIN_VALUE;
-		
-		for (String poi : occupancies.keySet()) {
-			for (Integer value : occupancies.get(poi)) {
-				if (value > result) {
-					result = value;
-				}
-			}
-		}
-		
-		if (result<1000) {
-			result = 1000;
-		}
-		
-		return result;
-	}
+
 
 
 	public List<Node> AstarSearch(
-			Mongo dao,
+			CityData cityData,
 			POI start_place,
 			POI end_place,
 			String start_time,
-			TreeMap<String, TreeMap<String, Double>> distances,
 			Map<String, Map<Integer, Node>> graph,
-			Map<String, HashMap<String, List<UncertainValue>>> times,
-			Map<String, HashMap<String, List<UncertainValue>>> congestions,
-			Map<String, List<Integer>> occupancies,
 			double crowd_preference) throws IOException {
 		
-		final double MAX_CONGESTION = dao.retrieveGridMaxCrowding();
-		final double MAX_OCCUPANCY = findMaxOccupancy(occupancies);
+		final double MAX_CONGESTION = cityData.retrieveGridMaxCrowding();
+		final double MAX_OCCUPANCY = cityData.findMaxOccupancy();
 
 		//try {
 		logger.info("start:" + start_place.getPlace_id());
@@ -340,7 +321,7 @@ public class PathFindingWithCrowding {
 		Node source = findStartNode(graph, start_place.getPlace_id());
 		String source_name;
 		if (source.getName().equals("0")) {
-			source_name = dao.retrieveClosestActivity(start_place).getPlace_id();
+			source_name = cityData.retrieveClosestActivity(start_place).getPlace_id();
 		} else {
 			source_name = source.getName();
 		}
@@ -378,16 +359,16 @@ public class PathFindingWithCrowding {
 				String current_name;
 				String child_name;
 				if (current.getName().equals("0")) {
-					current_name = dao.retrieveClosestActivity(start_place).getPlace_id();
+					current_name = cityData.retrieveClosestActivity(start_place).getPlace_id();
 				} else if (current.getName().equals("00")) {
-					current_name = dao.retrieveClosestActivity(end_place).getPlace_id();
+					current_name = cityData.retrieveClosestActivity(end_place).getPlace_id();
 				} else {
 					current_name = current.getName();
 				}
 				if (child.getName().equals("0")) {
-					child_name = dao.retrieveClosestActivity(start_place).getPlace_id();
+					child_name = cityData.retrieveClosestActivity(start_place).getPlace_id();
 				} else if (child.getName().equals("00")) {
-					child_name = dao.retrieveClosestActivity(end_place).getPlace_id();
+					child_name = cityData.retrieveClosestActivity(end_place).getPlace_id();
 				} else {
 					child_name = child.getName();
 				}
@@ -396,7 +377,7 @@ public class PathFindingWithCrowding {
 				//the crowding matrix is triangular, so I look for couples in reverse order if the original order doesn't provide a correspondence
 				String cong_k1;
 				String cong_k2;
-				if (congestions.containsKey(current_name) && congestions.get(current_name).containsKey(child_name)) {
+				if (cityData.crowding_levels.containsKey(current_name) && cityData.crowding_levels.get(current_name).containsKey(child_name)) {
 					cong_k1 = current_name;
 					cong_k2 = child_name;
 				} else {
@@ -413,22 +394,22 @@ public class PathFindingWithCrowding {
 				System.err.println("\t\tfrom:"+current_name);
 				System.err.println("\t\tto:"+child_name);
 				//System.err.println(times);
-				System.err.println("\t\t1:"+times.get(current_name));
-				System.err.println("\t\t2:"+times.get(current_name).get(child_name));
+				System.err.println("\t\t1:"+cityData.travel_times.get(current_name));
+				System.err.println("\t\t2:"+cityData.travel_times.get(current_name).get(child_name));
 				System.err.println("\t\t3:"+current.getDepartureTime());
 				System.err.println("\t\t4:"+TimeUtils.getTimeSlot(current.getDepartureTime()));
-				System.err.println("\t\t5:"+RandomValue.get(times.get(current_name).get(child_name).get(TimeUtils.getTimeSlot(current.getDepartureTime()))));
-				double time = round(RandomValue.get(times.get(current_name).get(child_name).get(TimeUtils.getTimeSlot(current.getDepartureTime()))), 5);
+				System.err.println("\t\t5:"+RandomValue.get(cityData.travel_times.get(current_name).get(child_name).get(TimeUtils.getTimeSlot(current.getDepartureTime()))));
+				double time = round(RandomValue.get(cityData.travel_times.get(current_name).get(child_name).get(TimeUtils.getTimeSlot(current.getDepartureTime()))), 5);
 				//System.out.println("\t\ttime:"+time);
-				double distance = distances.get(current_name).get(child_name);
+				double distance = cityData.distances.get(current_name).get(child_name);
 				//System.out.println("\t\tdistance:"+distance);
 				System.err.println("\t\t1:"+cong_k1);
 				System.err.println("\t\t2:"+cong_k2);
-				System.err.println("\t\t3:"+congestions.get(cong_k1));
-				System.err.println("\t\t4:"+congestions.get(cong_k1).get(cong_k2));
-				System.err.println("\t\t5:"+congestions.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(current.getDepartureTime())));
+				System.err.println("\t\t3:"+cityData.crowding_levels.get(cong_k1));
+				System.err.println("\t\t4:"+cityData.crowding_levels.get(cong_k1).get(cong_k2));
+				System.err.println("\t\t5:"+cityData.crowding_levels.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(current.getDepartureTime())));
 
-				double congestion = RandomValue.get(congestions.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(current.getDepartureTime())));
+				double congestion = RandomValue.get(cityData.crowding_levels.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(current.getDepartureTime())));
 				//System.out.println("\t\tcongestion:"+congestion);
 				double actual_speed = (distance/time) * (1d - Math.pow(Math.E, (-GAMMA*(1d/(congestion/MAX_CONGESTION)-1d))));
 				//System.out.println("\t\tactual_speed:"+actual_speed);
@@ -445,11 +426,11 @@ public class PathFindingWithCrowding {
 				double temp_arr_time_pref = ((current.getDepartureTime() + travel_cost_pref) >= 1440) ? ((current.getDepartureTime() + travel_cost_pref) - 1440) : (current.getDepartureTime() + travel_cost_pref);
 				//System.out.println("\t\ttemp_arr_time_pref:"+temp_arr_time_pref);
 				
-				double visit_time = RandomValue.get(times.get(child_name).get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual)));
+				double visit_time = RandomValue.get(cityData.travel_times.get(child_name).get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual)));
 				//System.out.println("\t\tvisit_time:"+visit_time);
 				double visit_distance = visit_time * MAX_SPEED;
 				//System.out.println("\t\tvisit_distance:"+visit_distance);
-				int occupancy = occupancies.get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual));
+				int occupancy = cityData.occupancies.get(child_name).get(TimeUtils.getTimeSlot((int) temp_arr_time_actual));
 				//System.out.println("\t\toccupancy:"+occupancy);
 				
 				double actual_visit_speed = MAX_SPEED * (1d - Math.pow(Math.E, (-GAMMA*(1d/(occupancy/MAX_OCCUPANCY)-1d))));
@@ -464,7 +445,7 @@ public class PathFindingWithCrowding {
 				double temp_dep_time_pref = temp_arr_time_pref + visit_cost_pref;
 				//System.out.println("\t\ttemp_dep_time_pref:"+temp_dep_time_pref);
 
-				double time_h_cost = round(RandomValue.get(times.get(source_name).get(child_name).get(TimeUtils.getTimeSlot(source.getDepartureTime()))), 5);
+				double time_h_cost = round(RandomValue.get(cityData.travel_times.get(source_name).get(child_name).get(TimeUtils.getTimeSlot(source.getDepartureTime()))), 5);
 				//System.out.println("\t\ttime_h_cost:"+time_h_cost);
 				double temp_f_scores = temp_dep_time_pref + time_h_cost;
 				//System.out.println("\t\ttemp_f_scores:"+temp_f_scores);

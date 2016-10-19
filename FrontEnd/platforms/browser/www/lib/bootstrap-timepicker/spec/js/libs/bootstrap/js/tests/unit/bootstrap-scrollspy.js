@@ -1,20 +1,20 @@
 $(function () {
 
-    module("bootstrap-scrollspy")
+    module("bootstrap-scrollspy");
 
       test("should provide no conflict", function () {
-        var scrollspy = $.fn.scrollspy.noConflict()
-        ok(!$.fn.scrollspy, 'scrollspy was set back to undefined (org value)')
+        var scrollspy = $.fn.scrollspy.noConflict();
+        ok(!$.fn.scrollspy, 'scrollspy was set back to undefined (org value)');
         $.fn.scrollspy = scrollspy
-      })
+      });
 
       test("should be defined on jquery object", function () {
         ok($(document.body).scrollspy, 'scrollspy method is defined')
-      })
+      });
 
       test("should return element", function () {
         ok($(document.body).scrollspy()[0] == document.body, 'document.body returned')
-      })
+      });
 
       test("should switch active class on scroll", function () {
         var sectionHTML = '<div id="masthead"></div>'
@@ -29,9 +29,9 @@ $(function () {
           + '</div>'
           + '</div>'
           + '</div>'
-          , $topbar = $(topbarHTML).scrollspy()
+          , $topbar = $(topbarHTML).scrollspy();
 
         ok($topbar.find('.active', true))
       })
 
-})
+});

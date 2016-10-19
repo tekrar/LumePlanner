@@ -1,5 +1,6 @@
 package services;
 
+import io.CityData;
 import io.Mongo;
 
 import java.util.ArrayList;
@@ -29,13 +30,10 @@ public class FindShortestPath {
 	
 	public FindShortestPath() {
 		logger = Logger.getLogger(FindShortestPath.class);
-		to_visit = new ArrayList<String>();
+		to_visit = new ArrayList<>();
 	}
 
-	public VisitPlan newPlan(Mongo dao, String user, POI departure, POI arrival, String start_time, 
-			List<String> POIsList, List<POI> full_pois, TreeMap<String, TreeMap<String, Double>> distances, Map<String, HashMap<String, List<UncertainValue>>> travel_times, 
-			Map<String, HashMap<String, List<UncertainValue>>> crowding_levels, 
-			Map<String, List<Integer>> occupancies, GraphHopper hopper) {
+	public VisitPlan newPlan(CityData cityData, String user, POI departure, POI arrival, String start_time, List<String> POIsList) {
 		for (String poi : POIsList) {
 			to_visit.add(poi);
 		}
@@ -48,7 +46,7 @@ public class FindShortestPath {
 		List<Node> path = new ArrayList<Node>();
 		List<Activity> activities = new ArrayList<Activity>();
 		try {
-			path = new PathFindingWithCrowding().AstarSearch(dao, departure, arrival, start_time, to_visit, distances, travel_times, crowding_levels, occupancies, 1, 1d);
+			path = new PathFindingWithCrowding().AstarSearch(cityData, departure, arrival, start_time, to_visit, 1, 1d);
 			logger.info("Shortest path with real cong.levels :"+path.get(0).getName()+"-"+path.get(path.size()-1).getName()+":"+path.get(path.size()-1).getF_scores());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -66,7 +64,7 @@ public class FindShortestPath {
 			if (n.getName().equals("0") || n.getName().equals("00")) {
 				p = (n.getName().equals("0")) ? departure : arrival;
 			} else {
-				for (POI poi : full_pois) {
+				for (POI poi : cityData.activities) {
 					if (n.getName().equals(poi.getPlace_id())){
 						p = poi;
 						break;
@@ -81,7 +79,7 @@ public class FindShortestPath {
 				to = p;
 			}
 			if (to != null) {
-				Path subpath = new TravelPath().compute(hopper, from, to);
+				Path subpath = new TravelPath().compute(cityData.hopper, from, to);
 				path_points.addPoints(subpath.getPoints());
 				path_points.incrementLength(subpath.getLength());
 			}
@@ -99,10 +97,7 @@ public class FindShortestPath {
 	}
 	
 	
-	public VisitPlan updatePlan(Mongo dao, Visit last_visit, VisitPlan plan, List<String> POIsList, 
-			List<POI> all_pois, TreeMap<String, TreeMap<String, Double>> distances, Map<String, HashMap<String, List<UncertainValue>>> travel_times, 
-			Map<String, HashMap<String, List<UncertainValue>>> crowding_levels, 
-			Map<String, List<Integer>> occupancies, GraphHopper hopper) {
+	public VisitPlan updatePlan(CityData cityData, Visit last_visit, VisitPlan plan, List<String> POIsList) {
 		
 		logger.info("user:"+plan.getUser());
 		logger.info("start:"+last_visit.getVisited().getPlace_id());
@@ -117,7 +112,7 @@ public class FindShortestPath {
 		List<Node> path = new ArrayList<Node>();
 		List<Activity> activities = new ArrayList<Activity>();
 		try {
-			path = new PathFindingWithCrowding().AstarSearch(dao, last_visit.getVisited(), plan.getArrival(), TimeUtils.getStringTime(last_visit.getTime()%86400000L), to_visit, distances, travel_times, crowding_levels, occupancies, 1, 1d);
+			path = new PathFindingWithCrowding().AstarSearch(cityData, last_visit.getVisited(), plan.getArrival(), TimeUtils.getStringTime(last_visit.getTime()%86400000L), to_visit, 1, 1d);
 			logger.info("Shortest path with real cong.levels :"+path.get(0).getName()+"-"+path.get(path.size()-1).getName()+":"+path.get(path.size()-1).getF_scores());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -135,7 +130,7 @@ public class FindShortestPath {
 			if (n.getName().equals("0") || n.getName().equals("00")) {
 				p = (n.getName().equals("0")) ? last_visit.getVisited() : plan.getArrival();
 			} else {
-				for (POI poi : all_pois) {
+				for (POI poi : cityData.activities) {
 					if (poi.getPlace_id().equals(n.getName())) {
 						p = poi;
 						break;
@@ -150,7 +145,7 @@ public class FindShortestPath {
 				to = p;
 			}
 			if (to != null) {
-				Path subpath = new TravelPath().compute(hopper, from, to);
+				Path subpath = new TravelPath().compute(cityData.hopper, from, to);
 				path_points.addPoints(subpath.getPoints());
 				path_points.incrementLength(subpath.getLength());
 			}

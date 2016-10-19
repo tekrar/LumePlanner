@@ -33,7 +33,7 @@ import static util.HaversineDistance.haverDist;
 @Controller
 @RequestMapping("/")
 public class RESTController {
-	//private Properties p;
+
 	private Mongo dao;
 
 	private static List<POI> activities;	
@@ -50,33 +50,22 @@ public class RESTController {
 
 	private static Map<String, Map<String, Map<Integer, Map<String, Double>>>> p2p_cell_paths;
 
-	/*
-	public RESTController() {
-		Properties p = new Properties();
+	private static String city = "Modena";
 
-		try {
-			p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
-			dao = new Mongo(p.getProperty("mongo.user"), p.getProperty("mongo.db"), p.getProperty("mongo.password"));
-		} catch(Exception e) {
-			//e.printStackTrace();
-			logger.info("Initialization for simulation experiment started");
-		}
-	}
-	*/
+	//public RESTController() {	}
+
 
 	@RequestMapping(value = "init", headers="Accept=application/json", method = RequestMethod.GET)
 	public @ResponseBody boolean init() {
 		boolean result = false;
 
 		if (!initialized) {
-			Properties p = new Properties();
 			try {
-				p.load(this.getClass().getClassLoader().getResourceAsStream("CM.properties"));
-				dao = new Mongo(p.getProperty("mongo.db"), p.getProperty("mongo.user"), p.getProperty("mongo.password"));
+				dao = new Mongo(CityProp.getInstance().get(city).getDB());
 
 				logger.info("Crowding Module initialization started");
 
-				grid_crowdings = new LoadFiles().load(dao, this.getClass().getResource("/../data/"+p.getProperty("data.dir")).getPath());
+				grid_crowdings = new LoadFiles().load(dao, this.getClass().getResource("/../data/"+ CityProp.getInstance().get(city).getDataDir()).getPath());
 				logger.info("Grid Crowdings imported ("+grid_crowdings.size()+")");
 
 				activities = dao.retrieveActivities();

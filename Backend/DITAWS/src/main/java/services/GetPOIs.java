@@ -1,5 +1,6 @@
 package services;
 
+import io.CityProp;
 import io.Mongo;
 
 import java.io.BufferedReader;
@@ -24,25 +25,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GetPOIs  {
 
-	private Properties p;
+	private static final String NOMINATIM_URL = "http://nominatim.openstreetmap.org/";
 	
 	public static void main(String[] args) throws Exception  {
 		GetPOIs g = new GetPOIs();
+		String city = "Modena";
 		String dir = "G:\\CODE\\IJ-IDEA\\LumePlanner\\Backend\\DITAWS\\src\\main\\webapp\\WEB-INF\\data\\modena\\";
-
-
-
-
-		Mongo dao = new Mongo("lume-modena", "dita","mames1976");
-
-
-		g.run(dao, dir);
+		Mongo dao = new Mongo(CityProp.getInstance().get(city).getDB());
+		String bbox = CityProp.getInstance().get(city).getBbox();
+		g.run(dao, dir, bbox);
 	}
 
 	static String [] POICategories = {"attractions", "monuments", "museums", "eating", "parks", "resting", "historical_sites", "religious_sites"}; //"lifestyle"
 
 	private Logger logger = Logger.getLogger(RESTController.class);
-	public void run(Mongo dao, String dataPath) {
+	public void run(Mongo dao, String dataPath, String bbox) {
 
 		
 		Map<String, Integer> ratings = new HashMap<>();//new SocialPulse().loadStars();
@@ -54,9 +51,6 @@ public class GetPOIs  {
 		BufferedReader url_br; //url API
 
 		try {
-			p = new Properties();
-			p.load(this.getClass().getClassLoader().getResourceAsStream("DITA.properties"));
-
 			for (int i=0; i<POICategories.length;i++)  {
 				File file = new File(dataPath+"nominatim/"+POICategories[i]);
 
@@ -77,7 +71,7 @@ public class GetPOIs  {
 						visiting_time = Double.parseDouble(rowCategory.split(",")[1]); //[1] contains the visiting time (not for hotels)
 
 					//osm API call to get POIs of a certain category type within the bbox
-					URL url = new URL(p.getProperty("osm.nominatim")+"search?q="+typeCategory+"&format=json&viewbox="+p.getProperty("bbox")+"&bounded=1&limit=1000");
+					URL url = new URL(NOMINATIM_URL+"search?q="+typeCategory+"&format=json&viewbox="+bbox+"&bounded=1&limit=1000");
 					logger.info(url.toString());
 					url_br = new BufferedReader(new InputStreamReader(url.openStream()));
 
