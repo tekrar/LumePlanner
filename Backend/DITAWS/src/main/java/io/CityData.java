@@ -7,11 +7,14 @@ import org.apache.log4j.Logger;
 import services.ComputeDistances;
 import services.GetPOIs;
 import util.Occupancies;
+import util.RandomValue;
 import util.TimeUtils;
 import util.TravelTime;
 
 import java.io.IOException;
 import java.util.*;
+
+import static util.Misc.round;
 
 /**
  * Created by marco on 18/10/2016.
@@ -21,9 +24,9 @@ public class CityData {
     public List<POI> activities;
     private List<POI> restaurants;
     private String last_crowding_levels;
-    public Map<String, HashMap<String, List<UncertainValue>>> crowding_levels;
+    private Map<String, HashMap<String, List<UncertainValue>>> crowding_levels;
     public Map<String, List<Integer>> occupancies;
-    public Map<String, HashMap<String, List<UncertainValue>>> travel_times;
+    private Map<String, HashMap<String, List<UncertainValue>>> travel_times;
     private Mongo dao;
     public GraphHopper hopper;
     public String data_path;
@@ -200,5 +203,29 @@ public class CityData {
 
     public POI retrieveActivity(String next_id) {
         return dao.retrieveActivity(next_id);
+    }
+
+
+    public double getTime(String from, String to, int time) {
+        return round(RandomValue.get(travel_times.get(from).get(to).get(TimeUtils.getTimeSlot(time))), 5);
+    }
+
+    public double getCrowd(String from, String to, int time) {
+
+        String cong_k1;
+        String cong_k2;
+        if (crowding_levels.containsKey(from) && crowding_levels.get(from).containsKey(to)) {
+            cong_k1 = from;
+            cong_k2 = to;
+        } else {
+            cong_k2 = from;
+            cong_k1 = to;
+        }
+        return RandomValue.get(crowding_levels.get(cong_k1).get(cong_k2).get(TimeUtils.getTimeSlot(time)));
+    }
+
+
+    public double getDistance(String from, String to) {
+        return distances.get(from).get(to);
     }
 }

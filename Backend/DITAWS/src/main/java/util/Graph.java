@@ -15,7 +15,7 @@ public class Graph {
 
 	private static Logger logger = Logger.getLogger(Graph.class);
 
-	//static Map<String, Double> h_walkTime = new HashMap<String, Double>(); //<POI, distance to end>
+	//static Map<String, Double> h_walkTime = new HashMap<String, Double>(); //<POI, getDistance to end>
 	//static Map<String, HashMap<String, ArrayList<UncertainValue>>> walkTime = new HashMap<String, HashMap<String, ArrayList<UncertainValue>>>(); //<POIstart, <POIend, walking time between> [seconds]
 	static Map<String, List<String>> nodeSuccessors = new HashMap<String, List<String>>();
 	static Map<String, Map<Integer, Node>> graph = new HashMap<String, Map<Integer, Node>>();

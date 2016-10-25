@@ -16,11 +16,11 @@
     <form ng-controller="SignController" class="form-horizontal" role="form" name="loginForm"  style="height:100%;border:0;padding-top:10%" novalidate>
       <div style="height:auto">
       <div class="form-group">
-        <label class="hidden-xs hidden-sm control-label col-sm-2" for="email" style="color:white">E-mail2:</label>
-        <label class="hidden-md hidden-lg control-label col-sm-2" for="email" style="color:white">E-mail2:</label>
+        <label class="hidden-xs hidden-sm control-label col-sm-2" for="email" style="color:white">E-mail:</label>
+        <label class="hidden-md hidden-lg control-label col-sm-2" for="email" style="color:white">E-mail:</label>
         <div class="col-sm-10">
-          <input id="email" class="form-control input-lg hidden-xs hidden-sm" type="email" name="email" ng-model="user.email" ng-maxlength=20 required>
-          <input id="email" class="form-control input-md hidden-md hidden-lg" type="email" name="email" ng-model="user.email" ng-maxlength=20 required>
+          <input id="email" class="form-control input-lg hidden-xs hidden-sm" type="email" name="email" ng-model="user.email" required>
+          <input id="email" class="form-control input-md hidden-md hidden-lg" type="email" name="email" ng-model="user.email" required>
           <div class="error-container" ng-show="loginForm.email.$dirty || loginForm.email.$invalid || !valid_email">
             <small class="error" ng-show="(loginForm.email.$error.email || !valid_email)">
               That is not a valid email. Please insert a valid email.
@@ -35,8 +35,8 @@
         <label class="hidden-xs hidden-sm control-label col-sm-2" for="password" style="color:white">Password:</label>
         <label class="hidden-md hidden-lg control-label col-sm-2" for="password" style="color:white">Password:</label>
         <div class="col-sm-10">
-          <input id="password" class="form-control input-lg hidden-xs hidden-sm" type="password" name="password" ng-model="user.password" ng-minlength=8 ng-maxlength=15 required>
-          <input id="password" class="form-control input-md hidden-md hidden-lg" type="password" name="password" ng-model="user.password" ng-minlength=8 ng-maxlength=15 required>
+          <input id="password" class="form-control input-lg hidden-xs hidden-sm" type="password" name="password" ng-model="user.password" required>
+          <input id="password" class="form-control input-md hidden-md hidden-lg" type="password" name="password" ng-model="user.password" required>
           <div class="error-container" ng-show="loginForm.password.$dirty || loginForm.password.$invalid || !valid_password">
             <small class="error" ng-show="loginForm.password.$error.minlength">
               Your password is required to be at least 8 characters.

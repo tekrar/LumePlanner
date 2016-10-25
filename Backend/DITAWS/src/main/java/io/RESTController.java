@@ -35,8 +35,8 @@ public class RESTController {
 
 	public RESTController() {
 		cityDataMap = new HashMap<>();
-		cityDataMap.put("Modena",new CityData("Modena"));
-		cityDataMap.put("Venezia",new CityData("Venezia"));
+		for(String city: CityProp.getInstance().keySet())
+			cityDataMap.put(city,new CityData(city));
 	}
 	
 

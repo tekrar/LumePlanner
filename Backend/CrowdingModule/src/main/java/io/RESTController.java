@@ -1,18 +1,14 @@
 package io;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import model.Cell;
-import model.POI;
 import model.POI2POICrowding;
 import model.UncertainValue;
 
 import org.apache.log4j.Logger;
-import org.geojson.LngLatAlt;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import au.com.bytecode.opencsv.CSVWriter;
 import services.ComputeP2PCrowdings;
-import services.LoadFiles;
 import services.UpdateCrowdings;
-
-import static util.HaversineDistance.haverDist;
 
 
 //import redis.clients.jedis.Jedis;
@@ -41,8 +33,8 @@ public class RESTController {
 
 	public RESTController() {
 		cityDataMap = new HashMap<>();
-		cityDataMap.put("Modena",new CityData("Modena"));
-		cityDataMap.put("Venezia",new CityData("Venezia"));
+		for(String city: CityProp.getInstance().keySet())
+			cityDataMap.put(city,new CityData(city));
 	}
 
 

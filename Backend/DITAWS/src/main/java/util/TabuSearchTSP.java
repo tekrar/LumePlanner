@@ -65,14 +65,14 @@ public class TabuSearchTSP {
 		int worstTopCostIndex = -1;
 		
 
-		//retrieve distance map
+		//retrieve getDistance map
 		TreeMap<String, TreeMap<String, Double>> distancesMap = getDistances(cityData, startPlace, endPlace, POIsIDlist);
 							//dao.retrieveDistances(startPlace, endPlace, POIsID)
 		
 		Map<String, Integer> mapPlaceIndex = new HashMap<String, Integer>();
 		Map<Integer, String> mapIndexPlace = new HashMap<Integer, String>();
 
-		//initialize distance matrix - tabuLength - numIterations - numTopSolutions
+		//initialize getDistance matrix - tabuLength - numIterations - numTopSolutions
 		distances = new double [distancesMap.size()][distancesMap.size()];
 		//logger.info("distances length:"+distances.length);
 		tabuLength = distances.length;
@@ -80,7 +80,7 @@ public class TabuSearchTSP {
 		numberOfIterations = 4*(int)Math.pow(distances.length,2);
 		numberOfTopSolutions = numBestSolutions;
 
-		//populate distance matrix
+		//populate getDistance matrix
 		int cRow = 0, cCol = 0;
 		for (String key : distancesMap.keySet()) {
 			//logger.info("1:"+key);
@@ -94,7 +94,7 @@ public class TabuSearchTSP {
 			}
 			cRow++;
 		}
-		//print distance matrix
+		//print getDistance matrix
 //		String out1 ="";
 //		for (int i=0; i<distances.length;i++) {
 //			for (int j=0; j<distances[i].length;j++) 
@@ -287,9 +287,9 @@ public class TabuSearchTSP {
 				TreeMap<String, Double> tos= new TreeMap<String, Double>();
 				for (String to : cityData.distances.get(from).keySet()) {
 					if (null != closest_to_end && closest_to_end.getPlace_id().equals(to)) {
-						tos.put("00", cityData.distances.get(from).get(to));
+						tos.put("00", cityData.getDistance(from,to));
 					} else {
-						tos.put(to, cityData.distances.get(from).get(to));
+						tos.put(to,  cityData.getDistance(from,to));
 					}
 				}
 				if (null != closest_to_end && closest_to_end.getPlace_id().equals(from)) {
@@ -310,6 +310,7 @@ public class TabuSearchTSP {
 		}
 		return distancesMap;
 	}
+
 
 	public int[] getBestNeighbour(int[][] tabuList, int[] initSolution) {
 

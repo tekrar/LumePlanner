@@ -21,7 +21,7 @@ angular
             $scope.user = {password: "", email: ""};
             $scope.$watch('user.email', function() {
               var string = ""+$scope.user.email;
-              var patt = new RegExp(/^([a-zA-Z0-9]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/);
+              var patt = new RegExp(/^([a-zA-Z0-9.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/);
               var res = (string.indexOf('.') !== -1) ? patt.test(string) : (string.length < 3) ? true : false;
               $scope.valid_email = res;
               $scope.already = false;

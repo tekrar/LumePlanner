@@ -1,8 +1,9 @@
-db.createUser({user:"dita",pwd:"mames1976",roles:[{role:"dbAdmin",db:"lume-modena"}]})
-
+db.createUser({user:"dita",pwd:"mames1976",roles:[{role:"dbAdmin",db:"lume-Ferrara"}]})
+db.createCollection("grid");
+db.createCollection("activities");
 db.grid.createIndex({geometry:"2dsphere"});
 db.grid.ensureIndex({geometry:"2dsphere"});
-
 db.activities.createIndex({geometry:"2dsphere"});
 db.activities.ensureIndex({geometry:"2dsphere"});
+
 

@@ -12,23 +12,30 @@ import java.io.PrintWriter;
 public class FakeCDRData {
 
     public static void main(String[] args) throws Exception {
-        run("modena");
+        for(String city: CityProp.getInstance().keySet()) {
+            System.out.println("Processing "+city);
+            run(city);
+        }
     }
 
     public static void run(String city) throws Exception {
 
-        String base_dir = "C:\\Users\\marco\\Desktop\\AppVenezia\\Backend\\CrowdingModule\\src\\main\\webapp\\WEB-INF\\data\\"+city+"\\";
+        String cm_base_dir = "G:\\CODE\\IJ-IDEA\\LumePlanner\\Backend\\CrowdingModule\\src\\main\\webapp\\WEB-INF\\data\\"+city+"\\";
+        String dita_base_dir = "G:\\CODE\\IJ-IDEA\\LumePlanner\\Backend\\DITAWS\\src\\main\\webapp\\WEB-INF\\data\\"+city+"\\";
+        new File(cm_base_dir).mkdirs();
+        new File(dita_base_dir).mkdirs();
         CityArea a = new CityArea(city, CityProp.getInstance().get(city).getLonLatBbox());
 
-        a.toGeoJson(base_dir+"grid.geojson");
+        a.toGeoJson(cm_base_dir+"grid.geojson");
+        a.toGeoJson(dita_base_dir+"grid.geojson");
 
+        a.toKml(cm_base_dir+"grid.kml");
 
-        new File(base_dir).mkdirs();
-        PrintWriter out_wd = new PrintWriter(new FileWriter(base_dir+"ts_cell_occupancy_wd_avg_n.csv"));
-        PrintWriter out_we = new PrintWriter(new FileWriter(base_dir+"ts_cell_occupancy_we_avg_n.csv"));
+        PrintWriter out_wd = new PrintWriter(new FileWriter(cm_base_dir+"ts_cell_occupancy_wd_avg_n.csv"));
+        PrintWriter out_we = new PrintWriter(new FileWriter(cm_base_dir+"ts_cell_occupancy_we_avg_n.csv"));
 
-        PrintWriter out_cell_max = new PrintWriter(new FileWriter(base_dir+"cell_max"));
-        PrintWriter out_grid_roads = new PrintWriter(new FileWriter(base_dir+"grid_roads.csv"));
+        PrintWriter out_cell_max = new PrintWriter(new FileWriter(cm_base_dir+"cell_max"));
+        PrintWriter out_grid_roads = new PrintWriter(new FileWriter(cm_base_dir+"grid_roads.csv"));
 
         for(int i=0; i<a.getNrows();i++)
             for(int j=0; j<a.getNcols();j++)
@@ -43,5 +50,6 @@ public class FakeCDRData {
         out_wd.close();
         out_we.close();
         out_cell_max.close();
+        out_grid_roads.close();
     }
 }

@@ -475,10 +475,10 @@ public class Mongo {
 		Cell result = null;
 		POI poi;
 		try {
-			logger.info("retrieveCellofPOI ----> place_id = "+place_id);
+
 			System.err.println("retrieveCellofPOI ----> place_id = "+place_id);
 			poi = mapper.readValue(db.getCollection("activities").find(new Document("place_id", place_id)).first().toJson(), POI.class);
-			logger.info("retrieveCellofPOI ----> POI = "+poi);
+
 			System.err.println("retrieveCellofPOI ----> POI = "+poi);
 			System.err.println("retrieveCellofPOI ----> POI GEOMETRY = "+poi.getGeometry());
 

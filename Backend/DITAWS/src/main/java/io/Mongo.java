@@ -294,26 +294,26 @@ public class Mongo {
 			POIsID.add(closest_to_end.getPlace_id());
 		}
 		Document inClause = new Document("from", new Document("$in", mapper.readValue(mapper.writeValueAsString(POIsID), List.class)));
-		logger.info("distance filter:"+mapper.readValue(mapper.writeValueAsString(POIsID), List.class));
+		logger.info("getDistance filter:"+mapper.readValue(mapper.writeValueAsString(POIsID), List.class));
 		//Document inClause = new Document("from", new Document("$in", mapper.writeValueAsString(POIsID)));
 		TreeMap<String, TreeMap<String, Double>> result = new TreeMap<String, TreeMap<String, Double>>(); //<From, <To, Distance>>
 
 		try {
 
 			for (Iterator<Document> iter = db.getCollection("distances").find(inClause).sort(new Document("from", 1)).iterator(); iter.hasNext();) {
-				Distance distance = mapper.readValue(iter.next().toJson(), Distance.class);
+				Distance getDistance = mapper.readValue(iter.next().toJson(), Distance.class);
 				TreeMap<String, Double> tos = new TreeMap<String, Double>();
-				for (DistanceTo current : distance.getDistances()) {
+				for (DistanceTo current : getDistance.getDistances()) {
 					if (null != closest_to_end && closest_to_end.getPlace_id().equals(current.getTo())) {
 						tos.put("00", current.getDistance());
 					} else {
 						tos.put(current.getTo(), current.getDistance());
 					}
 				}
-				if (null != closest_to_end && closest_to_end.getPlace_id().equals(distance.getFrom())) {
+				if (null != closest_to_end && closest_to_end.getPlace_id().equals(getDistance.getFrom())) {
 					result.put("00", tos);
 				} else {
-					result.put(distance.getFrom(), tos);
+					result.put(getDistance.getFrom(), tos);
 				}
 			}
 

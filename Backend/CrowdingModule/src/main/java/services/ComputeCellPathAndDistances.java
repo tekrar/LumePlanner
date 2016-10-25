@@ -14,7 +14,7 @@ import model.POI;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 
-import util.HaversineDistance;
+import util.Misc;
 
 public class ComputeCellPathAndDistances {
 
@@ -47,7 +47,7 @@ public class ComputeCellPathAndDistances {
 				Cell currentCell = adjacencies.removeFirst();
 				for (LngLatAlt vertex : currentCell.getGeometry().getExteriorRing()) {
 					double currentDistance = 0d;
-					if (shortestDistance > ( currentDistance = HaversineDistance.haverDist(
+					if (shortestDistance > ( currentDistance = Misc.haverDist(
 							new double[]{vertex.getLatitude(), vertex.getLongitude()}, 
 							new double[]{end_p.getGeometry().getCoordinates().getLatitude(), end_p.getGeometry().getCoordinates().getLongitude()}))) {
 						shortestDistance = currentDistance;
@@ -61,7 +61,7 @@ public class ComputeCellPathAndDistances {
 			//System.out.println("c:"+closestCell.getId());
 			//System.out.println("p:("+closestVertex.getLatitude()+","+closestVertex.getLongitude()+")");
 
-			result.get(num_cell_touched).put(closestCell.getId(), HaversineDistance.haverDist(
+			result.get(num_cell_touched).put(closestCell.getId(), Misc.haverDist(
 					new double[]{last_point_touched.getCoordinates().getLatitude(), last_point_touched.getCoordinates().getLongitude()}, 
 					new double[]{closestVertex.getLatitude(), closestVertex.getLongitude()}));
 
@@ -79,7 +79,7 @@ public class ComputeCellPathAndDistances {
 
 		System.err.println("---------->>>> "+end_c.getId());
 
-		result.get(num_cell_touched).put(end_c.getId(), HaversineDistance.haverDist(
+		result.get(num_cell_touched).put(end_c.getId(), Misc.haverDist(
 				new double[]{last_point_touched.getCoordinates().getLatitude(), last_point_touched.getCoordinates().getLongitude()}, 
 				new double[]{end_p.getGeometry().getCoordinates().getLatitude(), end_p.getGeometry().getCoordinates().getLongitude()}));
 
